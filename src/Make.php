@@ -20,7 +20,10 @@ namespace NFePHP\MDFe;
 
 use NFePHP\Common\DateTime\DateTime;
 use NFePHP\Common\Base\BaseMake;
+<<<<<<< HEAD
 use \DOMDocument;
+=======
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
 use \DOMElement;
 
 class Make extends BaseMake
@@ -47,6 +50,7 @@ class Make extends BaseMake
     public $chMDFe = '';
 
     //propriedades privadas utilizadas internamente pela classe
+<<<<<<< HEAD
     private $MDFe = ''; //DOMNode
     private $infMDFe = ''; //DOMNode
     private $ide = ''; //DOMNode
@@ -78,6 +82,78 @@ class Make extends BaseMake
     private $aInfTermDescarreg = array(); //array de DOMNode
     private $aInfEmbComb = array(); //array de DOMNode
     private $aCountDoc = array(); //contador de documentos fiscais
+=======
+    /**
+     * @type string|\DOMNode
+     */
+    private $MDFe = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $infMDFe = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $ide = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $emit = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $enderEmit = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $infModal = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $tot = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $infAdic = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $rodo = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $veicTracao = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $aereo = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $trem = '';
+    /**
+     * @type string|\DOMNode
+     */
+    private $aqua = '';
+
+    // Arrays
+    private $aInfMunCarrega = []; //array de DOMNode
+    private $aInfPercurso = []; //array de DOMNode
+    private $aInfMunDescarga = []; //array de DOMNode
+    private $aInfCTe = []; //array de DOMNode
+    private $aInfNFe = []; //array de DOMNode
+    private $aInfMDFe = []; //array de DOMNode
+    private $aLacres = []; //array de DOMNode
+    private $aAutXML = []; //array de DOMNode
+    private $aCondutor = []; //array de DOMNode
+    private $aReboque = []; //array de DOMNode
+    private $aDisp = []; //array de DOMNode
+    private $aVag = []; //array de DOMNode
+    private $aInfTermCarreg = []; //array de DOMNode
+    private $aInfTermDescarreg = []; //array de DOMNode
+    private $aInfEmbComb = []; //array de DOMNode
+    private $aCountDoc = []; //contador de documentos fiscais
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
 
     /**
      *
@@ -110,12 +186,20 @@ class Make extends BaseMake
         $this->dom->appChild($this->infMDFe, $this->tot, 'Falta tag "infMDFe"');
         //tag lacres [76]
         $this->zTagLacres();
+<<<<<<< HEAD
         //tag infAdic [78]
         $this->dom->appChild($this->infMDFe, $this->infAdic, 'Falta tag "infMDFe"');
+=======
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         // tag autXML [137]
         foreach ($this->aAutXML as $aut) {
             $this->dom->appChild($this->infMDFe, $aut, 'Falta tag "infMDFe"');
         }
+<<<<<<< HEAD
+=======
+        //tag infAdic [78]
+        $this->dom->appChild($this->infMDFe, $this->infAdic, 'Falta tag "infMDFe"');
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         //[1] tag infMDFe (1 A01)
         $this->dom->appChild($this->MDFe, $this->infMDFe, 'Falta tag "MDFe"');
         //[0] tag MDFe
@@ -135,6 +219,10 @@ class Make extends BaseMake
      *
      * @param  string $chave
      * @param  string $versao
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function taginfMDFe($chave = '', $versao = '')
@@ -153,7 +241,11 @@ class Make extends BaseMake
      * tag MDFe/infMDFe/ide
      *
      * @param  string $cUF
+<<<<<<< HEAD
      * @param  string $tbAmb
+=======
+     * @param  string $tpAmb
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @param  string $tpEmit
      * @param  string $mod
      * @param  string $serie
@@ -167,6 +259,10 @@ class Make extends BaseMake
      * @param  string $verProc
      * @param  string $ufIni
      * @param  string $ufFim
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagide(
@@ -309,6 +405,10 @@ class Make extends BaseMake
      *
      * @param  string $cMunCarrega
      * @param  string $xMunCarrega
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfMunCarrega(
@@ -340,6 +440,10 @@ class Make extends BaseMake
      * tag MDFe/infMDFe/ide/infPercurso
      *
      * @param  string $ufPer
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfPercurso($ufPer = '')
@@ -362,6 +466,7 @@ class Make extends BaseMake
      * tag MDFe/infMDFe/emit
      *
      * @param  string $cnpj
+<<<<<<< HEAD
      * @param  string $cpf
      * @param  string $xNome
      * @param  string $xFant
@@ -370,6 +475,12 @@ class Make extends BaseMake
      * @param  string $numIM
      * @param  string $cnae
      * @param  string $crt
+=======
+     * @param  string $numIE
+     * @param  string $xNome
+     * @param  string $xFant
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagemit(
@@ -402,6 +513,10 @@ class Make extends BaseMake
      * @param  string $siglaUF
      * @param  string $fone
      * @param  string $email
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagenderEmit(
@@ -495,9 +610,16 @@ class Make extends BaseMake
      * tagInfMunDescarga
      * tag MDFe/infMDFe/infDoc/infMunDescarga
      *
+<<<<<<< HEAD
      * @param  integer $item
      * @param  string  $cMunDescarga
      * @param  string  $xMunDescarga
+=======
+     * @param  integer $nItem
+     * @param  string  $cMunDescarga
+     * @param  string  $xMunDescarga
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfMunDescarga(
@@ -531,6 +653,10 @@ class Make extends BaseMake
      * @param  integer $nItem
      * @param  string  $chCTe
      * @param  string  $segCodBarra
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfCTe(
@@ -564,6 +690,10 @@ class Make extends BaseMake
      * @param  integer $nItem
      * @param  string  $chNFe
      * @param  string  $segCodBarra
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfNFe(
@@ -596,6 +726,10 @@ class Make extends BaseMake
      *
      * @param  integer $nItem
      * @param  string  $chMDFe
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfMDFeTransp(
@@ -624,6 +758,10 @@ class Make extends BaseMake
      * @param  string $vCarga
      * @param  string $cUnid
      * @param  string $qCarga
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagTot(
@@ -686,6 +824,10 @@ class Make extends BaseMake
      * tag MDFe/infMDFe/lacres
      *
      * @param  string $nLacre
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagLacres(
@@ -710,6 +852,10 @@ class Make extends BaseMake
      *
      * @param  string $infAdFisco
      * @param  string $infCpl
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function taginfAdic(
@@ -743,6 +889,10 @@ class Make extends BaseMake
      *
      * @param string $cnpj
      * @param string $cpf
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagautXML($cnpj = '', $cpf = '')
@@ -770,7 +920,12 @@ class Make extends BaseMake
      * tagInfModal
      * tag MDFe/infMDFe/infModal
      *
+<<<<<<< HEAD
      * @param  type $versaoModal
+=======
+     * @param  string $versaoModal
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfModal($versaoModal = '')
@@ -791,6 +946,10 @@ class Make extends BaseMake
      * @param  string $cAerEmb
      * @param  string $cAerDes
      * @param  string $dVoo
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagAereo(
@@ -857,6 +1016,10 @@ class Make extends BaseMake
      * @param  string $xOri
      * @param  string $xDest
      * @param  string $qVag
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagTrem(
@@ -913,7 +1076,12 @@ class Make extends BaseMake
      * @param  string $serie
      * @param  string $nVag
      * @param  string $nSeq
+<<<<<<< HEAD
      * @param  string $tUtil
+=======
+     * @param  string $tonUtil
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagVag(
@@ -965,6 +1133,10 @@ class Make extends BaseMake
      * @param  string $nViagem
      * @param  string $cPrtEmb
      * @param  string $cPrtDest
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagAqua(
@@ -1027,6 +1199,10 @@ class Make extends BaseMake
      * tag MDFe/infMDFe/infModal/Aqua/infTermCarreg
      *
      * @param  string $cTermCarreg
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfTermCarreg(
@@ -1049,6 +1225,10 @@ class Make extends BaseMake
      * tag MDFe/infMDFe/infModal/Aqua/infTermDescarreg
      *
      * @param  string $cTermDescarreg
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfTermDescarreg(
@@ -1070,7 +1250,12 @@ class Make extends BaseMake
      * tagInfEmbComb
      * tag MDFe/infMDFe/infModal/Aqua/infEmbComb
      *
+<<<<<<< HEAD
      * @param  string $$cEmbComb
+=======
+     * @param  string $cEmbComb
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfEmbComb(
@@ -1094,6 +1279,10 @@ class Make extends BaseMake
      *
      * @param  string $rntrc
      * @param  string $ciot
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagRodo(
@@ -1128,7 +1317,21 @@ class Make extends BaseMake
      * @param  string $tara
      * @param  string $capKG
      * @param  string $capM3
+<<<<<<< HEAD
      * @param  string $propRNTRC
+=======
+     * @param  string $tpRod
+     * @param  string $tpCar
+     * @param  string $UF
+     * @param  string $propRNTRC
+     * @param  string $propCPF
+     * @param  string $propCNPJ
+     * @param  string $propXNome
+     * @param  string $propIE
+     * @param  string $propUF
+     * @param  string $propTpProp
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagVeicTracao(
@@ -1140,7 +1343,17 @@ class Make extends BaseMake
         $tpRod = '',
         $tpCar = '',
         $UF = '',
+<<<<<<< HEAD
         $propRNTRC = ''
+=======
+        $propRNTRC = '',
+        $propCPF = '',
+        $propCNPJ = '',
+        $propXNome = '',
+        $propIE = '',
+        $propUF = '',
+        $propTpProp = ''
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
     ) {
         $veicTracao = $this->zTagVeiculo(
             'veicTracao',
@@ -1153,7 +1366,17 @@ class Make extends BaseMake
             $tpRod,
             $tpCar,
             $UF,
+<<<<<<< HEAD
             $propRNTRC
+=======
+            $propRNTRC,
+            $propCPF,
+            $propCNPJ,
+            $propXNome,
+            $propIE,
+            $propUF,
+            $propTpProp
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         );
         $this->veicTracao = $veicTracao;
         return $veicTracao;
@@ -1165,6 +1388,10 @@ class Make extends BaseMake
      *
      * @param  string $xNome
      * @param  string $cpf
+<<<<<<< HEAD
+=======
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagCondutor(
@@ -1194,12 +1421,30 @@ class Make extends BaseMake
      * tagVeicReboque
      * tag MDFe/infMDFe/infModal/rodo/reboque
      *
+<<<<<<< HEAD
      * @param  type $cInt
      * @param  type $placa
      * @param  type $tara
      * @param  type $capKG
      * @param  type $capM3
      * @param  type $propRNTRC
+=======
+     * @param string $cInt
+     * @param string $placa
+     * @param string $tara
+     * @param string $capKG
+     * @param string $capM3
+     * @param string $propRNTRC
+     * @param string $propCPF
+     * @param string $propCNPJ
+     * @param string $propXNome
+     * @param string $propIE
+     * @param string $propUF
+     * @param string $propTpProp
+     * @param string $tpCar
+     * @param string $UF
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagVeicReboque(
@@ -1208,10 +1453,45 @@ class Make extends BaseMake
         $tara = '',
         $capKG = '',
         $capM3 = '',
+<<<<<<< HEAD
         $propRNTRC = ''
     ) {
         $reboque = $this->zTagVeiculo('reboque', $cInt, $placa, $tara, $capKG, $capM3, $propRNTRC);
         $this->aReboque[] = $reboque;
+=======
+        $propRNTRC = '',
+        $propCPF = '',
+        $propCNPJ = '',
+        $propXNome = '',
+        $propIE = '',
+        $propUF = '',
+        $propTpProp = '',
+        $tpCar = '',
+        $UF = ''
+    ) {
+        $reboque = $this->zTagVeiculo(
+            'veicReboque',
+            $cInt,
+            $placa,
+            $tara,
+            [],
+            $capKG,
+            $capM3,
+            null,
+            $tpCar,
+            $UF,
+            $propRNTRC,
+            $propCPF,
+            $propCNPJ,
+            $propXNome,
+            $propIE,
+            $propUF,
+            $propTpProp
+        );
+
+        $this->aReboque[] = $reboque;
+
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         return $reboque;
     }
 
@@ -1219,9 +1499,16 @@ class Make extends BaseMake
      * tagValePed
      * tag MDFe/infMDFe/infModal/rodo/valePed
      *
+<<<<<<< HEAD
      * @param  type $cnpjForn
      * @param  type $cnpjPg
      * @param  type $nCompra
+=======
+     * @param  string $cnpjForn
+     * @param  string $cnpjPg
+     * @param  string $nCompra
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagValePed(
@@ -1258,12 +1545,33 @@ class Make extends BaseMake
     /**
      * zTagVeiculo
      *
+<<<<<<< HEAD
      * @param  string $cInt
      * @param  string $placa
      * @param  string $tara
      * @param  string $capKG
      * @param  string $capM3
      * @param  string $propRNTRC
+=======
+     * @param string $tag
+     * @param string $cInt
+     * @param string $placa
+     * @param string $tara
+     * @param array  $condutores
+     * @param string $capKG
+     * @param string $capM3
+     * @param string $tpRod
+     * @param string $tpCar
+     * @param string $UF
+     * @param string $propRNTRC
+     * @param string $propCPF
+     * @param string $propCNPJ
+     * @param string $propXNome
+     * @param string $propIE
+     * @param string $propUF
+     * @param string $propTpProp
+     *
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     protected function zTagVeiculo(
@@ -1277,7 +1585,17 @@ class Make extends BaseMake
         $tpRod = '',
         $tpCar = '',
         $UF = '',
+<<<<<<< HEAD
         $propRNTRC = ''
+=======
+        $propRNTRC = '',
+        $propCPF = '',
+        $propCNPJ = '',
+        $propXNome = '',
+        $propIE = '',
+        $propUF = '',
+        $propTpProp = ''
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
     ) {
         $node = $this->dom->createElement($tag);
         $this->dom->addChild(
@@ -1319,15 +1637,44 @@ class Make extends BaseMake
             false,
             "Capacidade em M3"
         );
+<<<<<<< HEAD
         $this->dom->addArrayChild(
             $node,
             $this->aCondutor
         );
+=======
+
+        $prop = $this->zTagPropVeiculo(
+            'prop',
+            $propCPF,
+            $propCNPJ,
+            $propRNTRC,
+            $propXNome,
+            $propIE,
+            $propUF,
+            $propTpProp
+        );
+
+        if ($prop) {
+            $node->appendChild($prop);
+        }
+
+        if ($condutores) {
+            $this->dom->addArrayChild(
+                $node,
+                $condutores
+            );
+        }
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         $this->dom->addChild(
             $node,
             "tpRod",
             $tpRod,
+<<<<<<< HEAD
             true,
+=======
+            false,
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
             "Tipo de rodado"
         );
         $this->dom->addChild(
@@ -1344,6 +1691,7 @@ class Make extends BaseMake
             true,
             "UF de licenciamento do veículo"
         );
+<<<<<<< HEAD
         if ($propRNTRC != '') {
             $prop = $this->dom->createElement("prop");
             $this->dom->addChild(
@@ -1355,10 +1703,101 @@ class Make extends BaseMake
             );
             $this->dom->appChild($node, $prop, '');
         }
+=======
+
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         return $node;
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * @param string $tag
+     * @param string $CPF
+     * @param string $CNPJ
+     * @param string $RNTRC
+     * @param string $xNome
+     * @param string $IE
+     * @param string $UF
+     * @param string $tpProp
+     *
+     * @return DOMElement
+     */
+    protected function zTagPropVeiculo(
+        $tag = '',
+        $CPF = '',
+        $CNPJ = '',
+        $RNTRC = '',
+        $xNome = '',
+        $IE = '',
+        $UF = '',
+        $tpProp = ''
+    ) {
+        $args = func_get_args();
+        unset($args[0]);
+
+        if (!array_filter($args)) {
+            return false;
+        }
+
+        $identificador = "<{$tag}> - ";
+        $nodeProp = $this->dom->createElement($tag);
+
+        $this->dom->addChild(
+            $nodeProp,
+            'CPF',
+            $CPF,
+            false,
+            "{$identificador} Número do CPF do proprietário"
+        );
+        $this->dom->addChild(
+            $nodeProp,
+            'CNPJ',
+            $CNPJ,
+            false,
+            "{$identificador} Número do CNPJ do proprietário"
+        );
+        $this->dom->addChild(
+            $nodeProp,
+            'RNTRC',
+            $RNTRC,
+            true,
+            "{$identificador} Registro Nacional dos Transportadores Rodoviários de Carga do proprietário"
+        );
+        $this->dom->addChild(
+            $nodeProp,
+            'xNome',
+            $xNome,
+            true,
+            "{$identificador} Razão Social ou Nome do proprietário do proprietário"
+        );
+        $this->dom->addChild(
+            $nodeProp,
+            'IE',
+            $IE,
+            true,
+            "{$identificador} Inscrição Estadual do proprietário"
+        );
+        $this->dom->addChild(
+            $nodeProp,
+            'UF',
+            $UF,
+            true,
+            "{$identificador} UF do proprietário"
+        );
+        $this->dom->addChild(
+            $nodeProp,
+            'tpProp',
+            $tpProp,
+            true,
+            "{$identificador} Tipo do Proprietário"
+        );
+
+        return $nodeProp;
+    }
+
+    /**
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * zTagMDFe
      * Tag raiz da MDFe
      * tag MDFe DOMNode
@@ -1399,7 +1838,11 @@ class Make extends BaseMake
      */
     protected function zTagInfDoc()
     {
+<<<<<<< HEAD
         $this->aCountDoc = array('CTe'=>0, 'NFe'=>0, 'MDFe'=>0);
+=======
+        $this->aCountDoc = ['CTe'=>0, 'NFe'=>0, 'MDFe'=>0];
+>>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         if (! empty($this->aInfMunDescarga)) {
             $infDoc = $this->dom->createElement("infDoc");
             $this->aCountDoc['CTe'] = 0;

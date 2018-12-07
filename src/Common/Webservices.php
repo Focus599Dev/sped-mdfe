@@ -1,6 +1,6 @@
 <?php
 
-namespace NFePHP\NFe\Common;
+namespace NFePHP\MDFe\Common;
 
 /**
  * Class to Read and preprocess WS parameters from xml storage
@@ -46,6 +46,7 @@ class Webservices
     {
         $autfile = realpath(__DIR__ . '/../../config/autorizadores.json');
         $autorizadores = json_decode(file_get_contents($autfile), true);
+        
         if (!key_exists($sigla, $autorizadores[$modelo])) {
             throw new \RuntimeException(
                 "Não existe o autorizador [$sigla] para os "
@@ -53,9 +54,11 @@ class Webservices
             );
         }
         $auto = $autorizadores[$modelo][$sigla];
+
         if (empty($auto) || empty($this->std)) {
             return false;
         }
+
         if (empty($this->std->$auto)) {
             throw new \RuntimeException(
                 "Não existem webservices cadastrados para  [$sigla] no modelo [$modelo]"

@@ -24,7 +24,10 @@ use NFePHP\Common\Strings;
 use NFePHP\Common\TimeZoneByUF;
 use NFePHP\Common\UFList;
 use NFePHP\Common\Validator;
+use NFePHP\MDFe\Factories\Header;
 use SoapHeader;
+use NFePHP\MDFe\Soap\SoapCurl;
+use NFePHP\MDFe\Soap\SoapInterface;
 
 class Tools {
 
@@ -171,6 +174,13 @@ class Tools {
     ];
 
     /**
+     * @var array
+     */
+    protected $availableVersions = [
+        '3.00' => 'PL_MDFe_300_NT022018',
+    ];
+
+    /**
      * Constructor
      * load configurations,
      * load Digital Certificate,
@@ -184,14 +194,14 @@ class Tools {
         $this->pathwsfiles = realpath(
             __DIR__ . '/../../config'
         ).'/';
+
         //valid config json string
-        $this->config = $configJson;
+        $this->config = json_decode($configJson);
         
         $this->version($this->config->versao);
         $this->setEnvironmentTimeZone($this->config->siglaUF);
         $this->certificate = $certificate;
         $this->setEnvironment($this->config->tpAmb);
-        $this->contingency = new Contingency();
         $this->soap = new SoapCurl($certificate);
         if ($this->config->proxy){
             $this->soap->proxy($this->config->proxy, $this->config->proxyPort, $this->config->proxyUser, $this->config->proxyPass);
@@ -238,7 +248,8 @@ class Tools {
 
         $webs = new Webservices($this->getXmlUrlPath());
 
-        $sigla = $uf;
+        // $sigla = $uf;
+        $sigla = 'RS';
 
         $stdServ = $webs->get($sigla, $ambiente, $this->modelo);
 
@@ -260,7 +271,6 @@ class Tools {
 
         //recuperação do cUF
         $this->urlcUF = $this->getcUF($uf);
-       
         //recuperação da versão
         $this->urlVersion = $stdServ->$service->version;
         //recuperação da url do serviço
@@ -269,6 +279,7 @@ class Tools {
         $this->urlMethod = $stdServ->$service->method;
         //recuperação da operação
         $this->urlOperation = $stdServ->$service->operation;
+
         //montagem do namespace do serviço
         $this->urlNamespace = sprintf(
             "%s/wsdl/%s",
@@ -334,11 +345,131 @@ class Tools {
     /**
      * Verify if SOAP class is loaded, if not, force load SoapCurl
     */
-    protected function checkSoap()
-    {
+    protected function checkSoap(){
         if (empty($this->soap)) {
             $this->soap = new SoapCurl($this->certificate);
         }
+    }
+
+    public function version($version = null){
+        
+        if (null === $version) {
+            return $this->versao;
+        }
+        
+        //Verify version template is defined
+        if (false === isset($this->availableVersions[$version])) {
+            throw new \InvalidArgumentException('Essa versão de layout não está disponível');
+        }
+        
+        $this->versao = $version;
+        $this->config->schemes = $this->availableVersions[$version];
+        $this->pathschemes = realpath(
+            __DIR__ . '/../../schemes/'. $this->config->schemes
+        ).'/';
+        
+        return $this->versao;
+    }
+
+    /**
+     * Recover cUF number from state acronym
+     * @param string $acronym Sigla do estado
+     * @return int number cUF
+    */
+    public function getcUF($acronym){
+        return UFlist::getCodeByUF($acronym);
+    }
+
+    /**
+     * Sign MDFe
+     * @param  string  $xml MDFe xml content
+     * @return string signed MDFe xml
+     * @throws RuntimeException
+    */
+    
+    public function signMDFe($xml){
+
+        if (empty($xml)) {
+            throw new InvalidArgumentException('$xml');
+        }
+
+        //remove all invalid strings
+        $xml = Strings::clearXmlString($xml);
+
+        $signed = Signer::sign(
+            $this->certificate,
+            $xml,
+            'infMDFe',
+            'Id',
+            $this->algorithm,
+            $this->canonical
+        );
+
+        $dom = new DOMDocument('1.0', 'UTF-8');
+
+        $dom->preserveWhiteSpace = false;
+        
+        $dom->formatOutput = false;
+        
+        $dom->loadXML($signed);
+
+        $modelo = $dom->getElementsByTagName('mod')->item(0)->nodeValue;
+
+        $this->isValid($this->versao, $signed, 'mdfe');
+        
+        $domInfo = new DOMDocument('1.0', 'UTF-8');
+
+        $domInfo->preserveWhiteSpace = false;
+        
+        $domInfo->formatOutput = false;
+
+        $node = $dom->getElementsByTagName('rodo')->item(0);
+
+        $node = $domInfo->importNode($node, true);
+
+        $domInfo->appendChild($node);
+
+        $this->isValid($this->versao, $domInfo->saveXML(), 'mdfeModalRodoviario');
+
+        return $signed;
+    }
+
+    /**
+     * Performs xml validation with its respective
+     * XSD structure definition document
+     * NOTE: if dont exists the XSD file will return true
+     * @param string $version layout version
+     * @param string $body
+     * @param string $method
+     * @return boolean
+     */
+    protected function isValid($version, $body, $method){
+        
+        $schema = $this->pathschemes.$method."_v$version.xsd";
+
+        if (!is_file($schema)) {
+            return true;
+        }
+
+        return Validator::isValid(
+            $body,
+            $schema
+        );
+
+    }
+
+     /**
+     * Set or get model of document MDFe = 58
+     * @param int $model
+     * @return int modelo class parameter
+     */
+    public function model($model = null)
+    {
+        if ($model == 58) {
+            $this->modelo = $model;
+        }
+
+        return $this->modelo;
     }
 
 }

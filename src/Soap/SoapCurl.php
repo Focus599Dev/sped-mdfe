@@ -74,6 +74,7 @@ class SoapCurl extends SoapBase implements SoapInterface
         }
 
         $this->requestHead = implode("\n", $parameters);
+        
         $this->requestBody = '<?xml version="1.0" encoding="utf-8"?>' . chr(10) . $envelope;
 
         try {
@@ -112,6 +113,7 @@ class SoapCurl extends SoapBase implements SoapInterface
                 curl_setopt($oCurl, CURLOPT_POSTFIELDS, $envelope);
                 curl_setopt($oCurl, CURLOPT_HTTPHEADER, $parameters);
             }
+
             $response = curl_exec($oCurl);
 
             $this->soaperror = curl_error($oCurl);

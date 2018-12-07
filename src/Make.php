@@ -18,23 +18,22 @@ namespace NFePHP\MDFe;
  * @author    Roberto L. Machado <linux.rlm at gmail dot com>
  */
 
-use NFePHP\Common\DateTime\DateTime;
-use NFePHP\Common\Base\BaseMake;
-<<<<<<< HEAD
-use \DOMDocument;
-=======
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-use \DOMElement;
+use NFePHP\Common\Keys;
+use NFePHP\Common\DOMImproved as Dom;
+use NFePHP\Common\Strings;
+use stdClass;
+use RuntimeException;
+use DOMElement;
+use DateTime;
 
-class Make extends BaseMake
-{
+class Make{
     /**
      * versao
      * numero da versão do xml da MDFe
      *
      * @var string
      */
-    public $versao = '1.00';
+    public $versao = '3.00';
     /**
      * mod
      * modelo da MDFe 58
@@ -42,6 +41,13 @@ class Make extends BaseMake
      * @var integer
      */
     public $mod = '58';
+
+    /**
+     * Erros
+     * @var array
+     */
+    private $erros;
+
     /**
      * chave da MDFe
      *
@@ -50,39 +56,6 @@ class Make extends BaseMake
     public $chMDFe = '';
 
     //propriedades privadas utilizadas internamente pela classe
-<<<<<<< HEAD
-    private $MDFe = ''; //DOMNode
-    private $infMDFe = ''; //DOMNode
-    private $ide = ''; //DOMNode
-    private $emit = ''; //DOMNode
-    private $enderEmit = ''; //DOMNode
-    private $infModal = ''; //DOMNode
-    private $tot = ''; //DOMNode
-    private $infAdic = ''; //DOMNode
-    private $rodo = ''; //DOMNode
-    private $veicTracao = ''; //DOMNode
-    private $aereo = ''; //DOMNode
-    private $trem = ''; //DOMNode
-    private $aqua = ''; //DOMNode
-
-    // Arrays
-    private $aInfMunCarrega = array(); //array de DOMNode
-    private $aInfPercurso = array(); //array de DOMNode
-    private $aInfMunDescarga = array(); //array de DOMNode
-    private $aInfCTe = array(); //array de DOMNode
-    private $aInfNFe = array(); //array de DOMNode
-    private $aInfMDFe = array(); //array de DOMNode
-    private $aLacres = array(); //array de DOMNode
-    private $aAutXML = array(); //array de DOMNode
-    private $aCondutor = array(); //array de DOMNode
-    private $aReboque = array(); //array de DOMNode
-    private $aDisp = array(); //array de DOMNode
-    private $aVag = array(); //array de DOMNode
-    private $aInfTermCarreg = array(); //array de DOMNode
-    private $aInfTermDescarreg = array(); //array de DOMNode
-    private $aInfEmbComb = array(); //array de DOMNode
-    private $aCountDoc = array(); //contador de documentos fiscais
-=======
     /**
      * @type string|\DOMNode
      */
@@ -107,6 +80,11 @@ class Make extends BaseMake
      * @type string|\DOMNode
      */
     private $infModal = '';
+
+    /**
+     * @type string|\DOMNode
+     */
+    private $seg;
     /**
      * @type string|\DOMNode
      */
@@ -153,7 +131,33 @@ class Make extends BaseMake
     private $aInfTermDescarreg = []; //array de DOMNode
     private $aInfEmbComb = []; //array de DOMNode
     private $aCountDoc = []; //contador de documentos fiscais
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+
+        /**
+     * Função construtora cria um objeto DOMDocument
+     * que será carregado com o documento fiscal
+     */
+    public function __construct()
+    {
+        $this->dom = new Dom('1.0', 'UTF-8');
+        
+        $this->dom->preserveWhiteSpace = false;
+        
+        $this->dom->formatOutput = false;
+
+        $this->erros = array();
+    }
+
+    /**
+     * Returns xml string and assembly it is necessary
+     * @return string
+     */
+    public function getXML(){
+        if (empty($this->xml)) {
+            $this->montaMDFe();
+        }
+
+        return $this->xml;
+    }
 
     /**
      *
@@ -166,6 +170,7 @@ class Make extends BaseMake
         }
         //cria a tag raiz da MDFe
         $this->zTagMDFe();
+
         //monta a tag ide com as tags adicionais
         $this->zTagIde();
         //tag ide [4]
@@ -175,10 +180,15 @@ class Make extends BaseMake
         //tag emit [25]
         $this->dom->appChild($this->infMDFe, $this->emit, 'Falta tag "infMDFe"');
         //tag infModal [41]
+
+        $this->tagInfModal($this->versao);
+
         $this->zTagRodo();
-        $this->zTagAereo();
-        $this->zTagFerrov();
-        $this->zTagAqua();
+        
+        // criar posteriromente
+        // $this->zTagAereo();
+        // $this->zTagFerrov();
+        // $this->zTagAqua();
         $this->dom->appChild($this->infMDFe, $this->infModal, 'Falta tag "infMDFe"');
         //tag indDoc [44]
         $this->zTagInfDoc();
@@ -186,28 +196,21 @@ class Make extends BaseMake
         $this->dom->appChild($this->infMDFe, $this->tot, 'Falta tag "infMDFe"');
         //tag lacres [76]
         $this->zTagLacres();
-<<<<<<< HEAD
-        //tag infAdic [78]
-        $this->dom->appChild($this->infMDFe, $this->infAdic, 'Falta tag "infMDFe"');
-=======
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         // tag autXML [137]
         foreach ($this->aAutXML as $aut) {
             $this->dom->appChild($this->infMDFe, $aut, 'Falta tag "infMDFe"');
         }
-<<<<<<< HEAD
-=======
         //tag infAdic [78]
         $this->dom->appChild($this->infMDFe, $this->infAdic, 'Falta tag "infMDFe"');
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
         //[1] tag infMDFe (1 A01)
         $this->dom->appChild($this->MDFe, $this->infMDFe, 'Falta tag "MDFe"');
         //[0] tag MDFe
-        $this->dom->appChild($this->dom, $this->MDFe, 'Falta DOMDocument');
+        $this->dom->appendChild($this->MDFe);
         // testa da chave
         $this->zTestaChaveXML($this->dom);
         //convert DOMDocument para string
         $this->xml = $this->dom->saveXML();
+
         return true;
     }
 
@@ -219,245 +222,269 @@ class Make extends BaseMake
      *
      * @param  string $chave
      * @param  string $versao
-<<<<<<< HEAD
-=======
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
-    public function taginfMDFe($chave = '', $versao = '')
-    {
+    public function taginfMDFe(stdClass $std){
+        
+        $possible = ['Id', 'versao'];
+
+        $std = $this->equilizeParameters($std, $possible);
+
         $this->infMDFe = $this->dom->createElement("infMDFe");
-        $this->infMDFe->setAttribute("Id", 'MDFe'.$chave);
-        $this->infMDFe->setAttribute("versao", $versao);
-        $this->chMDFe = $chave;
-        $this->versao = $versao;
+        
+        $this->infMDFe->setAttribute("Id", $std->Id);
+        
+        $this->infMDFe->setAttribute("versao", $std->versao);
+        
+        $this->chMDFe = $std->Id;
+        
+        $this->versao = $std->versao;
+
         return $this->infMDFe;
     }
 
     /**
      * tgaide
-     * Informações de identificação da MDFe 4 pai 1
+     * Informações de identificação da MDFe
      * tag MDFe/infMDFe/ide
      *
-     * @param  string $cUF
-<<<<<<< HEAD
-     * @param  string $tbAmb
-=======
-     * @param  string $tpAmb
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-     * @param  string $tpEmit
-     * @param  string $mod
-     * @param  string $serie
-     * @param  string $nMDF
-     * @param  string $cMDF
-     * @param  string $cDV
-     * @param  string $modal
-     * @param  string $dhEmi
-     * @param  string $tpEmis
-     * @param  string $procEmi
-     * @param  string $verProc
-     * @param  string $ufIni
-     * @param  string $ufFim
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+     * @param  stdClass $std
      * @return DOMElement
      */
-    public function tagide(
-        $cUF = '',
-        $tpAmb = '',
-        $tpEmit = '',
-        $mod = '58',
-        $serie = '',
-        $nMDF = '',
-        $cMDF = '',
-        $cDV = '',
-        $modal = '',
-        $dhEmi = '',
-        $tpEmis = '',
-        $procEmi = '',
-        $verProc = '',
-        $ufIni = '',
-        $ufFim = ''
-    ) {
-        $this->tpAmb = $tpAmb;
-        if ($dhEmi == '') {
-            $dhEmi = DateTime::convertTimestampToSefazTime();
+    public function tagide(stdClass $std) {
+
+        $possible = [
+            'cUF' => '',
+            'tpAmb' => '',
+            'tpEmit' => '',
+            'mod' => '58',
+            'serie' => '',
+            'nMDF' => '',
+            'cMDF' => '',
+            'modal' => '',
+            'dhEmi' => '',
+            'tpEmis' => '',
+            'procEmi' => '',
+            'verProc' => '',
+            'UFIni' => '',
+            'UFFim' => '',
+            'tpTransp' => '',
+            'dhIniViagem' => '',
+            'dhIniViagem' => '',
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+
+        $this->tpAmb = $std->tpAmb;
+
+        if ($std->dhEmi == '') {
+            $dateNow = new \DateTime();
+
+            $std->dhEmi = $dateNow->format('c');
         }
+
         $identificador = '[4] <ide> - ';
+
         $ide = $this->dom->createElement("ide");
+        
         $this->dom->addChild(
             $ide,
             "cUF",
-            $cUF,
+            $std->cUF,
             true,
             $identificador . "Código da UF do emitente do Documento Fiscal"
         );
+
         $this->dom->addChild(
             $ide,
             "tpAmb",
-            $tpAmb,
+            $std->tpAmb,
             true,
             $identificador . "Identificação do Ambiente"
         );
+
         $this->dom->addChild(
             $ide,
             "tpEmit",
-            $tpEmit,
+            $std->tpEmit,
             true,
             $identificador . "Indicador da tipo de emitente"
         );
+
+        $this->dom->addChild(
+            $ide,
+            "tpTransp",
+            $std->tpTransp,
+            false,
+            $identificador . "Tipo do Transportador"
+        );
+
         $this->dom->addChild(
             $ide,
             "mod",
-            $mod,
+            $std->mod,
             true,
             $identificador . "Código do Modelo do Documento Fiscal"
         );
+
         $this->dom->addChild(
             $ide,
             "serie",
-            $serie,
+            $std->serie,
             true,
             $identificador . "Série do Documento Fiscal"
         );
+
         $this->dom->addChild(
             $ide,
             "nMDF",
-            $nMDF,
+            intval($std->nMDF),
             true,
             $identificador . "Número do Documento Fiscal"
         );
+
         $this->dom->addChild(
             $ide,
             "cMDF",
-            $cMDF,
+            $std->cMDF,
             true,
             $identificador . "Código do numérico do MDF"
         );
+
         $this->dom->addChild(
             $ide,
             "cDV",
-            $cDV,
+            $std->cDV,
             true,
             $identificador . "Dígito Verificador da Chave de Acesso da NF-e"
         );
+
         $this->dom->addChild(
             $ide,
             "modal",
-            $modal,
+            $std->modal,
             true,
             $identificador . "Modalidade de transporte"
         );
+
         $this->dom->addChild(
             $ide,
             "dhEmi",
-            $dhEmi,
+            $std->dhEmi,
             true,
             $identificador . "Data e hora de emissão do Documento Fiscal"
         );
+
         $this->dom->addChild(
             $ide,
             "tpEmis",
-            $tpEmis,
+            $std->tpEmis,
             true,
             $identificador . "Tipo de Emissão do Documento Fiscal"
         );
+
         $this->dom->addChild(
             $ide,
             "procEmi",
-            $procEmi,
+            $std->procEmi,
             true,
             $identificador . "Processo de emissão"
         );
+
         $this->dom->addChild(
             $ide,
             "verProc",
-            $verProc,
+            $std->verProc,
             true,
             $identificador . "Versão do Processo de emissão"
         );
+
         $this->dom->addChild(
             $ide,
             "UFIni",
-            $ufIni,
+            $std->UFIni,
             true,
             $identificador . "Sigla da UF do Carregamento"
         );
+
         $this->dom->addChild(
             $ide,
             "UFFim",
-            $ufFim,
+            $std->UFFim,
             true,
             $identificador . "Sigla da UF do Descarregamento"
         );
-        $this->mod = $mod;
+
+        if (isset($std->infMunCarrega) && $std->infMunCarrega){
+
+            foreach ($std->infMunCarrega as $stdinfMunCarrega) {
+            
+                $infMunCarrega = $this->dom->createElement("infMunCarrega");
+
+                $this->dom->addChild(
+                    $infMunCarrega,
+                    "cMunCarrega",
+                    $stdinfMunCarrega->cMunCarrega,
+                    true,
+                    "Código do Município de Carregamento"
+                );
+                
+                $this->dom->addChild(
+                    $infMunCarrega,
+                    "xMunCarrega",
+                    $stdinfMunCarrega->xMunCarrega,
+                    true,
+                    "Nome do Município de Carregamento"
+                );
+
+                $this->dom->appChild($ide, $infMunCarrega, 'Falta tag "ide"');
+
+            }
+
+        }
+
+        if (isset($std->infPercurso) && $std->infPercurso){
+
+            foreach ($std->infPercurso as $stdinfPercurso) {
+
+                $infPercurso = $this->dom->createElement("infPercurso");
+
+                $this->dom->addChild(
+                    $infPercurso,
+                    "UFPer",
+                    $stdinfPercurso->ufPer,
+                    true,
+                    "Sigla das Unidades da Federação do percurso"
+                );
+
+                $this->dom->appChild($ide, $infPercurso, 'Falta tag "ide"');
+
+            }
+
+        }
+
+        $this->dom->addChild(
+            $ide,
+            "dhIniViagem",
+            $std->dhIniViagem,
+            false,
+            $identificador . "Data e hora previstos de inicio da viagem"
+        );
+
+        $this->dom->addChild(
+            $ide,
+            "indCanalVerde",
+            $std->indCanalVerde,
+            false,
+            $identificador . "Prestação de serviço participante do projeto Canal Verde"
+        );
+
+        $this->mod = $std->mod;
+
         $this->ide = $ide;
+
         return $ide;
-    }
-
-    /**
-     * tagInfMunCarrega
-     *
-     * tag MDFe/infMDFe/ide/infMunCarrega
-     *
-     * @param  string $cMunCarrega
-     * @param  string $xMunCarrega
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-     * @return DOMElement
-     */
-    public function tagInfMunCarrega(
-        $cMunCarrega = '',
-        $xMunCarrega = ''
-    ) {
-        $infMunCarrega = $this->dom->createElement("infMunCarrega");
-        $this->dom->addChild(
-            $infMunCarrega,
-            "cMunCarrega",
-            $cMunCarrega,
-            true,
-            "Código do Município de Carregamento"
-        );
-        $this->dom->addChild(
-            $infMunCarrega,
-            "xMunCarrega",
-            $xMunCarrega,
-            true,
-            "Nome do Município de Carregamento"
-        );
-        $this->aInfMunCarrega[] = $infMunCarrega;
-        return $infMunCarrega;
-    }
-
-    /**
-     * tagInfPercurso
-     *
-     * tag MDFe/infMDFe/ide/infPercurso
-     *
-     * @param  string $ufPer
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-     * @return DOMElement
-     */
-    public function tagInfPercurso($ufPer = '')
-    {
-        $infPercurso = $this->dom->createElement("infPercurso");
-        $this->dom->addChild(
-            $infPercurso,
-            "UFPer",
-            $ufPer,
-            true,
-            "Sigla das Unidades da Federação do percurso"
-        );
-        $this->aInfPercurso[] = $infPercurso;
-        return $infPercurso;
     }
 
     /**
@@ -465,37 +492,44 @@ class Make extends BaseMake
      * Identificação do emitente da MDFe [25] pai 1
      * tag MDFe/infMDFe/emit
      *
-     * @param  string $cnpj
-<<<<<<< HEAD
-     * @param  string $cpf
-     * @param  string $xNome
-     * @param  string $xFant
-     * @param  string $numIE
-     * @param  string $numIEST
-     * @param  string $numIM
-     * @param  string $cnae
-     * @param  string $crt
-=======
-     * @param  string $numIE
-     * @param  string $xNome
-     * @param  string $xFant
+     * @param stdClass $std
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
-    public function tagemit(
-        $cnpj = '',
-        $numIE = '',
-        $xNome = '',
-        $xFant = ''
-    ) {
+    public function tagemit(stdClass $std) {
+
+        $possible = [
+            'CNPJ',
+            'CPF',
+            'IE',
+            'xNome',
+            'xFant',
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+
         $identificador = '[25] <emit> - ';
+
         $this->emit = $this->dom->createElement("emit");
-        $this->dom->addChild($this->emit, "CNPJ", $cnpj, true, $identificador . "CNPJ do emitente");
-        $this->dom->addChild($this->emit, "IE", $numIE, true, $identificador . "Inscrição Estadual do emitente");
-        $this->dom->addChild($this->emit, "xNome", $xNome, true, $identificador . "Razão Social ou Nome do emitente");
-        $this->dom->addChild($this->emit, "xFant", $xFant, false, $identificador . "Nome fantasia do emitente");
+
+        if ($std->CNPJ){
+            
+            $this->dom->addChild($this->emit, "CNPJ", $std->CNPJ, true, $identificador . "CNPJ do emitente");
+
+        } else if ($std->CPF){
+
+            $this->dom->addChild($this->emit, "CPF", $std->CPF, true, $identificador . "CPF do emitente");
+
+        }
+
+        $this->dom->addChild($this->emit, "IE", $std->IE, true, $identificador . "Inscrição Estadual do emitente");
+        
+        $this->dom->addChild($this->emit, "xNome", $std->xNome, true, $identificador . "Razão Social ou Nome do emitente");
+        
+        $this->dom->addChild($this->emit, "xFant", $std->xFant, false, $identificador . "Nome fantasia do emitente");
+
         return $this->emit;
+
     }
 
     /**
@@ -503,106 +537,109 @@ class Make extends BaseMake
      * Endereço do emitente [30] pai [25]
      * tag MDFe/infMDFe/emit/endEmit
      *
-     * @param  string $xLgr
-     * @param  string $nro
-     * @param  string $xCpl
-     * @param  string $xBairro
-     * @param  string $cMun
-     * @param  string $xMun
-     * @param  string $cep
-     * @param  string $siglaUF
-     * @param  string $fone
-     * @param  string $email
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+     * @param stdClass $std
      * @return DOMElement
      */
-    public function tagenderEmit(
-        $xLgr = '',
-        $nro = '',
-        $xCpl = '',
-        $xBairro = '',
-        $cMun = '',
-        $xMun = '',
-        $cep = '',
-        $siglaUF = '',
-        $fone = '',
-        $email = ''
-    ) {
+    public function tagenderEmit(stdClass $std) {
+        $possible = [
+            'xLgr',
+            'nro',
+            'xCpl',
+            'xBairro',
+            'cMun',
+            'xMun',
+            'CEP',
+            'UF',
+            'fone',
+            'email'
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+
         $identificador = '[30] <enderEmit> - ';
+
         $this->enderEmit = $this->dom->createElement("enderEmit");
+
         $this->dom->addChild(
             $this->enderEmit,
             "xLgr",
-            $xLgr,
+            $std->xLgr,
             true,
             $identificador . "Logradouro do Endereço do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "nro",
-            $nro,
+            $std->nro,
             true,
             $identificador . "Número do Endereço do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "xCpl",
-            $xCpl,
+            $std->xCpl,
             false,
             $identificador . "Complemento do Endereço do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "xBairro",
-            $xBairro,
+            $std->xBairro,
             true,
             $identificador . "Bairro do Endereço do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "cMun",
-            $cMun,
+            $std->cMun,
             true,
             $identificador . "Código do município do Endereço do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "xMun",
-            $xMun,
+            $std->xMun,
             true,
             $identificador . "Nome do município do Endereço do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "CEP",
-            $cep,
+            $std->CEP,
             true,
             $identificador . "Código do CEP do Endereço do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "UF",
-            $siglaUF,
+            $std->UF,
             true,
             $identificador . "Sigla da UF do Endereço do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "fone",
-            $fone,
+            $std->fone,
             false,
             $identificador . "Número de telefone do emitente"
         );
+
         $this->dom->addChild(
             $this->enderEmit,
             "email",
-            $email,
+            $std->email,
             false,
             $identificador . "Endereço de email do emitente"
         );
+
         return $this->enderEmit;
     }
 
@@ -610,39 +647,40 @@ class Make extends BaseMake
      * tagInfMunDescarga
      * tag MDFe/infMDFe/infDoc/infMunDescarga
      *
-<<<<<<< HEAD
-     * @param  integer $item
-     * @param  string  $cMunDescarga
-     * @param  string  $xMunDescarga
-=======
-     * @param  integer $nItem
-     * @param  string  $cMunDescarga
-     * @param  string  $xMunDescarga
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+     * @param stdClass $std
      * @return DOMElement
      */
-    public function tagInfMunDescarga(
-        $nItem = 0,
-        $cMunDescarga = '',
-        $xMunDescarga = ''
-    ) {
+    public function tagInfMunDescarga(stdClass $std) {
+            
+
         $infMunDescarga = $this->dom->createElement("infMunDescarga");
+
+        $possible = [
+            'item',
+            'cMunDescarga',
+            'xMunDescarga'
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+        
         $this->dom->addChild(
             $infMunDescarga,
             "cMunDescarga",
-            $cMunDescarga,
+            $std->cMunDescarga,
             true,
             "Código do Município de Descarga"
         );
+
         $this->dom->addChild(
             $infMunDescarga,
             "xMunDescarga",
-            $xMunDescarga,
+            $std->xMunDescarga,
             true,
             "Nome do Município de Descarga"
         );
-        $this->aInfMunDescarga[$nItem] = $infMunDescarga;
+
+        $this->aInfMunDescarga[$std->item] = $infMunDescarga;
+
         return $infMunDescarga;
     }
 
@@ -650,37 +688,243 @@ class Make extends BaseMake
      * tagInfCTe
      * tag MDFe/infMDFe/infDoc/infMunDescarga/infCTe
      *
-     * @param  integer $nItem
-     * @param  string  $chCTe
-     * @param  string  $segCodBarra
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+     * @param  stdClass $std
      * @return DOMElement
      */
-    public function tagInfCTe(
-        $nItem = 0,
-        $chCTe = '',
-        $segCodBarra = ''
-    ) {
+    public function tagInfCTe($stdinfCTe, $stdinfUnidTransp, $stdPeri, $stdInfEntregaParcial) {
+
         $infCTe = $this->dom->createElement("infCTe");
+
+        $possibleCTe = [
+            'chCTe',
+            'SegCodBarra',
+            'indReentrega',
+        ];
+
+        $stdinfCTe = $this->equilizeParameters($stdinfCTe, $possibleCTe);
+
         $this->dom->addChild(
             $infCTe,
             "chCTe",
-            $chCTe,
+            $stdinfCTe->chCTe,
             true,
             "Chave de Acesso CTe"
         );
+        
         $this->dom->addChild(
             $infCTe,
             "SegCodBarra",
-            $segCodBarra,
+            $stdinfCTe->SegCodBarra,
             false,
             "Segundo código de barras do CTe"
         );
-        $this->aInfCTe[$nItem][] = $infCTe;
-        return $infCTe;
+
+        $this->dom->addChild(
+            $infCTe,
+            "indReentrega",
+            $stdinfCTe->indReentrega,
+            false,
+            "Indicador de Reentrega"
+        );
+
+        if ($stdinfUnidTransp){
+
+            foreach ($stdinfUnidTransp as $key => $std) {
+
+                $infUnidTransp = $this->dom->createElement("infUnidTransp");
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "tpUnidTransp",
+                    $std->tpUnidTransp,
+                    true,
+                    "Tipo da Unidade de Transporte"
+                );
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "idUnidTransp",
+                    $std->idUnidTransp,
+                    true,
+                    "Identificaçãoda unidade de transporte"
+                );
+
+                if (isset($std->lacUnidTransp) && $std->lacUnidTransp){
+
+                    foreach ($std->lacUnidTransp as $stdlacUnidTransp) {
+
+                        $lacUnidTransp = $this->dom->createElement("lacUnidTransp");
+
+                        $this->dom->addChild(
+                            $lacUnidTransp,
+                            "nLacre",
+                            $stdlacUnidTransp->nLacre,
+                            true,
+                            "Número do lacre"
+                        );     
+
+                        $this->dom->appChild($infUnidTransp, $lacUnidTransp, 'Falta tag "infUnidCarga"');                   
+
+                    }
+
+                }
+
+                if (isset($std->infUnidCarga) && $std->infUnidCarga){
+
+                    foreach ($std->infUnidCarga as $key2 => $stdinfUnidCarga) {
+                        
+                        $infUnidCarga = $this->dom->createElement("infUnidCarga");
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "tpUnidCarga",
+                            $stdinfUnidCarga->tpUnidCarga,
+                            true,
+                            "Tipo da Unidade de Carga"
+                        );
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "idUnidCarga",
+                            $stdinfUnidCarga->idUnidCarga,
+                            true,
+                            "Identificação da Unidade de Carga"
+                        );
+
+                        if (isset($stdinfUnidCarga->lacUnidCarga) && $stdinfUnidCarga->lacUnidCarga){
+
+                            foreach ($stdinfUnidCarga->lacUnidCarga as $key3 => $stdlacUnidCarga) {
+
+                                $lacUnidCarga = $this->dom->createElement("lacUnidCarga");
+
+                                $this->dom->addChild(
+                                    $lacUnidCarga,
+                                    "nLacre",
+                                    $stdlacUnidCarga->nLacre,
+                                    true,
+                                    "Número do lacre"
+                                );
+
+
+                                $this->dom->appChild($infUnidCarga, $lacUnidCarga, 'Falta tag "infUnidCarga"');
+
+                            }
+
+                        }
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "qtdRat",
+                            $std->qtdRat,
+                            false,
+                            "Quantidade rateada (Peso,Volume)"
+                        );
+
+                        $this->dom->appChild($infUnidTransp, $infUnidCarga, 'Falta tag "infUnidCarga"');
+
+                    }
+
+                }
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "qtdRat",
+                    $std->qtdRat,
+                    false,
+                    "Quantidade rateada (Peso,Volume)"
+                );
+
+                $this->dom->appChild($infCTe, $infUnidTransp, 'Falta tag "infCTe"');
+
+            }
+        }
+
+        if ($stdPeri){
+
+            foreach ($stdPeri as $key => $stdperi) {
+
+                $peri = $this->dom->createElement("peri");
+
+                $this->dom->addChild(
+                    $peri,
+                    "nONU",
+                    $stdperi->nONU,
+                    true,
+                    "Numero ONU/UN"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "xNomeAE",
+                    $stdperi->xNomeAE,
+                    false,
+                    "Nome apropriado para embarque do produto"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "xClaRisco",
+                    $stdperi->xClaRisco,
+                    false,
+                    "Classe ou subclasse/divisão, e risco subsidiário/risco secundario"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "grEmb",
+                    $stdperi->grEmb,
+                    false,
+                    "Grupo de Embalagem"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "qTotProd",
+                    $stdperi->qTotProd,
+                    true,
+                    "Quantidade total por produto"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "qVolTipo",
+                    $stdperi->qVolTipo,
+                    false,
+                    "Quantidade e Tipo de volumes"
+                );
+
+                $this->dom->appChild($infCTe, $peri, 'Falta tag "infCTe"');
+
+            }
+
+        }
+
+        if ($stdInfEntregaParcial){
+
+            $infEntregaParcial = $this->dom->createElement("infEntregaParcial");
+
+            $this->dom->addChild(
+                $infEntregaParcial,
+                "qtdTotal",
+                $stdInfEntregaParcial->qtdTotal,
+                true,
+                "Quantidade total de volumes"
+            );
+
+            $this->dom->addChild(
+                $infEntregaParcial,
+                "qtdParcial",
+                $stdInfEntregaParcial->qtdParcial,
+                true,
+                "Quantidade de volumes N enviados no MDF-e"
+            );
+
+            $this->dom->appChild($infCTe, $infEntregaParcial, 'Falta tag "infCTe"');
+        }
+
+        $this->aInfCTe[$stdinfCTe->item][] = $infCTe;
+
+        return ( count($this->aInfCTe[$stdinfCTe->item]) - 1 );
     }
 
     /**
@@ -690,33 +934,212 @@ class Make extends BaseMake
      * @param  integer $nItem
      * @param  string  $chNFe
      * @param  string  $segCodBarra
-<<<<<<< HEAD
-=======
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
-    public function tagInfNFe(
-        $nItem = 0,
-        $chNFe = '',
-        $segCodBarra = ''
-    ) {
+    public function tagInfNFe($tagInfNFe, $stdinfUnidTransp, $stdPeri, $stdInfEntregaParcial) {
+        
         $infNFe = $this->dom->createElement("infNFe");
+
         $this->dom->addChild(
             $infNFe,
             "chNFe",
-            $chNFe,
+            $tagInfNFe->chNFe,
             true,
             "Chave de Acesso da NFe"
         );
+
         $this->dom->addChild(
             $infNFe,
             "SegCodBarra",
-            $segCodBarra,
+            $tagInfNFe->SegCodBarra,
             false,
             "Segundo código de barras da NFe"
         );
-        $this->aInfNFe[$nItem][] = $infNFe;
+
+        $this->dom->addChild(
+            $infNFe,
+            "indReentrega",
+            $tagInfNFe->indReentrega,
+            false,
+            "Segundo código de barras da NFe"
+        );
+
+
+        if ($stdinfUnidTransp){
+
+            foreach ($stdinfUnidTransp as $key => $std) {
+
+                $infUnidTransp = $this->dom->createElement("infUnidTransp");
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "tpUnidTransp",
+                    $std->tpUnidTransp,
+                    true,
+                    "Tipo da Unidade de Transporte"
+                );
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "idUnidTransp",
+                    $std->idUnidTransp,
+                    true,
+                    "Identificaçãoda unidade de transporte"
+                );
+
+                if (isset($std->lacUnidTransp) && $std->lacUnidTransp){
+
+                    foreach ($std->lacUnidTransp as $stdlacUnidTransp) {
+
+                        $lacUnidTransp = $this->dom->createElement("lacUnidTransp");
+
+                        $this->dom->addChild(
+                            $lacUnidTransp,
+                            "nLacre",
+                            $stdlacUnidTransp->nLacre,
+                            true,
+                            "Número do lacre"
+                        );                        
+
+                        $this->dom->appChild($infUnidTransp, $lacUnidTransp, 'Falta tag "infUnidCarga"');
+
+                    }
+
+                }
+
+                if (isset($std->infUnidCarga) && $std->infUnidCarga){
+
+                    foreach ($std->infUnidCarga as $key2 => $stdinfUnidCarga) {
+                        
+                        $infUnidCarga = $this->dom->createElement("infUnidCarga");
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "tpUnidCarga",
+                            $stdinfUnidCarga->tpUnidCarga,
+                            true,
+                            "Tipo da Unidade de Carga"
+                        );
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "idUnidCarga",
+                            $stdinfUnidCarga->idUnidCarga,
+                            true,
+                            "Identificação da Unidade de Carga"
+                        );
+
+                        if (isset($stdinfUnidCarga->lacUnidCarga) && $stdinfUnidCarga->lacUnidCarga){
+
+                            foreach ($stdinfUnidCarga->lacUnidCarga as $key3 => $stdlacUnidCarga) {
+
+                                $lacUnidCarga = $this->dom->createElement("lacUnidCarga");
+
+                                $this->dom->addChild(
+                                    $lacUnidCarga,
+                                    "nLacre",
+                                    $stdlacUnidCarga->nLacre,
+                                    true,
+                                    "Número do lacre"
+                                );
+
+
+                                $this->dom->appChild($infUnidCarga, $lacUnidCarga, 'Falta tag "infUnidCarga"');
+
+                            }
+
+                        }
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "qtdRat",
+                            $std->qtdRat,
+                            false,
+                            "Quantidade rateada (Peso,Volume)"
+                        );
+
+                        $this->dom->appChild($infUnidTransp, $infUnidCarga, 'Falta tag "infUnidCarga"');
+
+                    }
+
+                }
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "qtdRat",
+                    $std->qtdRat,
+                    false,
+                    "Quantidade rateada (Peso,Volume)"
+                );
+
+                $this->dom->appChild($infNFe, $infUnidTransp, 'Falta tag "infCTe"');
+
+            }
+        }
+
+        if ($stdPeri){
+
+            foreach ($stdPeri as $key => $stdperi) {
+
+                $peri = $this->dom->createElement("peri");
+
+                $this->dom->addChild(
+                    $peri,
+                    "nONU",
+                    $stdperi->nONU,
+                    true,
+                    "Numero ONU/UN"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "xNomeAE",
+                    $stdperi->xNomeAE,
+                    false,
+                    "Nome apropriado para embarque do produto"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "xClaRisco",
+                    $stdperi->xClaRisco,
+                    false,
+                    "Classe ou subclasse/divisão, e risco subsidiário/risco secundario"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "grEmb",
+                    $stdperi->grEmb,
+                    false,
+                    "Grupo de Embalagem"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "qTotProd",
+                    $stdperi->qTotProd,
+                    true,
+                    "Quantidade total por produto"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "qVolTipo",
+                    $stdperi->qVolTipo,
+                    false,
+                    "Quantidade e Tipo de volumes"
+                );
+
+                $this->dom->appChild($infNFe, $peri, 'Falta tag "infCTe"');
+
+            }
+
+        }
+
+        $this->aInfNFe[$tagInfNFe->item][] = $infNFe;
+
         return $infNFe;
     }
 
@@ -726,96 +1149,373 @@ class Make extends BaseMake
      *
      * @param  integer $nItem
      * @param  string  $chMDFe
-<<<<<<< HEAD
-=======
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
-    public function tagInfMDFeTransp(
-        $nItem = 0,
-        $chMDFe = ''
-    ) {
+    public function tagInfMDFeTransp($stdinfMDFeTransp, $stdinfUnidTransp, $stdPeri, $stdInfEntregaParcial) {
+
+        $possible = [
+            'chMDFe',
+            'indReentrega'
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+
         $infMDFeTransp = $this->dom->createElement("infMDFeTransp");
+        
         $this->dom->addChild(
             $infMDFeTransp,
             "chMDFe",
-            $chMDFe,
+            $std->chMDFe,
             true,
             "Chave de Acesso da MDFe"
         );
-        $this->aInfMDFe[$nItem][] = $infMDFeTransp;
+
+        $this->dom->addChild(
+            $infMDFeTransp,
+            "indReentrega",
+            $std->indReentrega,
+            false,
+            "Indicador de Reentrega"
+        );
+
+        if ($stdinfUnidTransp){
+
+            foreach ($stdinfUnidTransp as $key => $std) {
+
+                $infUnidTransp = $this->dom->createElement("infUnidTransp");
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "tpUnidTransp",
+                    $std->tpUnidTransp,
+                    true,
+                    "Tipo da Unidade de Transporte"
+                );
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "idUnidTransp",
+                    $std->idUnidTransp,
+                    true,
+                    "Identificaçãoda unidade de transporte"
+                );
+
+                if (isset($std->lacUnidTransp) && $std->lacUnidTransp){
+
+                    foreach ($std->lacUnidTransp as $stdlacUnidTransp) {
+
+                        $lacUnidTransp = $this->dom->createElement("lacUnidTransp");
+
+                        $this->dom->addChild(
+                            $lacUnidTransp,
+                            "nLacre",
+                            $stdlacUnidTransp->nLacre,
+                            true,
+                            "Número do lacre"
+                        );     
+
+                        $this->dom->appChild($infUnidTransp, $lacUnidTransp, 'Falta tag "infUnidCarga"');                   
+
+                    }
+
+                }
+
+                if (isset($std->infUnidCarga) && $std->infUnidCarga){
+
+                    foreach ($std->infUnidCarga as $key2 => $stdinfUnidCarga) {
+                        
+                        $infUnidCarga = $this->dom->createElement("infUnidCarga");
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "tpUnidCarga",
+                            $stdinfUnidCarga->tpUnidCarga,
+                            true,
+                            "Tipo da Unidade de Carga"
+                        );
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "idUnidCarga",
+                            $stdinfUnidCarga->idUnidCarga,
+                            true,
+                            "Identificação da Unidade de Carga"
+                        );
+
+                        if (isset($stdinfUnidCarga->lacUnidCarga) && $stdinfUnidCarga->lacUnidCarga){
+
+                            foreach ($stdinfUnidCarga->lacUnidCarga as $key3 => $stdlacUnidCarga) {
+
+                                $lacUnidCarga = $this->dom->createElement("lacUnidCarga");
+
+                                $this->dom->addChild(
+                                    $lacUnidCarga,
+                                    "nLacre",
+                                    $stdlacUnidCarga->nLacre,
+                                    true,
+                                    "Número do lacre"
+                                );
+
+
+                                $this->dom->appChild($infUnidCarga, $lacUnidCarga, 'Falta tag "infUnidCarga"');
+
+                            }
+
+                        }
+
+                        $this->dom->addChild(
+                            $infUnidCarga,
+                            "qtdRat",
+                            $std->qtdRat,
+                            false,
+                            "Quantidade rateada (Peso,Volume)"
+                        );
+
+                        $this->dom->appChild($infUnidTransp, $infUnidCarga, 'Falta tag "infUnidCarga"');
+
+                    }
+
+                }
+
+                $this->dom->addChild(
+                    $infUnidTransp,
+                    "qtdRat",
+                    $std->qtdRat,
+                    false,
+                    "Quantidade rateada (Peso,Volume)"
+                );
+
+                $this->dom->appChild($infMDFeTransp, $infUnidTransp, 'Falta tag "infCTe"');
+
+            }
+        }
+
+        if ($stdPeri){
+
+            foreach ($stdPeri as $key => $stdperi) {
+
+                $peri = $this->dom->createElement("peri");
+
+                $this->dom->addChild(
+                    $peri,
+                    "nONU",
+                    $stdperi->nONU,
+                    true,
+                    "Numero ONU/UN"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "xNomeAE",
+                    $stdperi->xNomeAE,
+                    false,
+                    "Nome apropriado para embarque do produto"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "xClaRisco",
+                    $stdperi->xClaRisco,
+                    false,
+                    "Classe ou subclasse/divisão, e risco subsidiário/risco secundario"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "grEmb",
+                    $stdperi->grEmb,
+                    false,
+                    "Grupo de Embalagem"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "qTotProd",
+                    $stdperi->qTotProd,
+                    true,
+                    "Quantidade total por produto"
+                );
+
+                $this->dom->addChild(
+                    $peri,
+                    "qVolTipo",
+                    $stdperi->qVolTipo,
+                    false,
+                    "Quantidade e Tipo de volumes"
+                );
+
+                $this->dom->appChild($infMDFeTransp, $peri, 'Falta tag "infCTe"');
+
+            }
+
+        }
+
+        $this->aInfMDFe[$stdinfMDFeTransp->item][] = $infMDFeTransp;
+
         return $infMDFeTransp;
+
+    }
+
+    /**
+     * tagSeg
+     * tag MDFe/seg
+     *
+     * @param  integer $nItem
+     * @param  string  $chMDFe
+     *
+     * @return DOMElement
+    */
+    
+    public function tagSeg(stdClass $stdinfResp){
+
+        $seg = $this->dom->createElement("seg");
+
+        if (isset($stdinfResp->infResp) && (array)$stdinfResp->infResp){
+
+            $infResp = $this->dom->createElement("infResp");
+
+            $this->dom->addChild(
+                $infResp,
+                "respSeg",
+                $stdinfResp->infResp->respSeg,
+                true,
+                "Responsável pelo seguro"
+            );
+
+            $this->dom->addChild(
+                $infResp,
+                "CNPJ",
+                $stdinfResp->infResp->CNPJ,
+                false,
+                "Número do CNPJ do responsável pelo seguro"
+            );
+
+            $this->dom->addChild(
+                $infResp,
+                "CPF",
+                $stdinfResp->infResp->CPF,
+                false,
+                "Número do CPF do responsável pelo seguro"
+            );
+
+            $this->dom->appChild($seg, $infResp, 'Falta tag "seg"');
+
+        }
+
+        if (isset($stdinfResp->infSeg) && (array)$stdinfResp->infSeg){
+
+            $infSeg = $this->dom->createElement("infSeg");
+
+            $this->dom->addChild(
+                $infSeg,
+                "respSeg",
+                $stdinfResp->infSeg->xSeg,
+                true,
+                "Nome da Seguradora"
+            );
+
+            $this->dom->addChild(
+                $infSeg,
+                "CNPJ",
+                $stdinfResp->infSeg->CNPJ,
+                true,
+                "Número do CNPJ da seguradora"
+            );
+
+            $this->dom->appChild($seg, $infSeg, 'Falta tag "seg"');   
+        }
+
+        $this->dom->addChild(
+            $seg,
+            "nApol",
+            $stdinfResp->nApol,
+            false,
+            "Número da Apólice"
+        );
+
+        $this->dom->addChild(
+            $seg,
+            "nAver",
+            $stdinfResp->nAver,
+            false,
+            "Número da Averbação"
+        );
+
+
+        $this->seg = $seg;
+
+        return $seg;
     }
 
     /**
      * tagTot
      * tag MDFe/infMDFe/tot
      *
-     * @param  string $qCTe
-     * @param  string $qNFe
-     * @param  string $qMDFe
-     * @param  string $vCarga
-     * @param  string $cUnid
-     * @param  string $qCarga
-<<<<<<< HEAD
-=======
+     * @param  stdClass $std
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
-    public function tagTot(
-        $qCTe = '',
-        $qNFe = '',
-        $qMDFe = '',
-        $vCarga = '',
-        $cUnid = '',
-        $qCarga = ''
-    ) {
+    public function tagTot(stdClass $std) {
+        
+        $possible = [
+            'qCTe',
+            'qNFe',
+            'qMDFe',
+            'vCarga',
+            'cUnid',
+            'qCarga'
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+
         $tot = $this->dom->createElement("tot");
+
         $this->dom->addChild(
             $tot,
             "qCTe",
-            $qCTe,
+            $std->qCTe,
             false,
             "Quantidade total de CT-e relacionados no Manifesto"
         );
         $this->dom->addChild(
             $tot,
             "qNFe",
-            $qNFe,
+            $std->qNFe,
             false,
             "Quantidade total de NF-e relacionados no Manifesto"
         );
         $this->dom->addChild(
             $tot,
             "qMDFe",
-            $qMDFe,
+            $std->qMDFe,
             false,
             "Quantidade total de MDF-e relacionados no Manifesto"
         );
         $this->dom->addChild(
             $tot,
             "vCarga",
-            $vCarga,
+            $std->vCarga,
             true,
             "Valor total da mercadoria/carga transportada"
         );
         $this->dom->addChild(
             $tot,
             "cUnid",
-            $cUnid,
+            $std->cUnid,
             true,
             "Código da unidade de medida do Peso Bruto da Carga / Mercadoria Transportada"
         );
         $this->dom->addChild(
             $tot,
             "qCarga",
-            $qCarga,
+            $std->qCarga,
             true,
             "Peso Bruto Total da Carga / Mercadoria Transportada"
         );
+
         $this->tot = $tot;
+
         return $tot;
     }
 
@@ -823,25 +1523,30 @@ class Make extends BaseMake
      * tagLacres
      * tag MDFe/infMDFe/lacres
      *
-     * @param  string $nLacre
-<<<<<<< HEAD
-=======
+     * @param  stdClass $std
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
-    public function tagLacres(
-        $nLacre = ''
-    ) {
+    public function tagLacres(stdClass $std) {
+        
+        $possible = [
+            'nLacre'
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+
         $lacres = $this->dom->createElement("lacres");
+        
         $this->dom->addChild(
             $lacres,
             "nLacre",
-            $nLacre,
+            $std->nLacre,
             false,
             "Número do lacre"
         );
+
         $this->aLacres[] = $lacres;
+
         return $lacres;
     }
 
@@ -850,34 +1555,38 @@ class Make extends BaseMake
      * Grupo de Informações Adicionais Z01 pai A01
      * tag MDFe/infMDFe/infAdic (opcional)
      *
-     * @param  string $infAdFisco
-     * @param  string $infCpl
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+     * @param  stdClass $std
      * @return DOMElement
      */
-    public function taginfAdic(
-        $infAdFisco = '',
-        $infCpl = ''
-    ) {
+    public function taginfAdic(stdClass $std) {
+
+        $possible = [
+            'infAdFisco',
+            'infCpl'
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+
         $infAdic = $this->dom->createElement("infAdic");
+
         $this->dom->addChild(
             $infAdic,
             "infAdFisco",
-            $infAdFisco,
+            $std->infAdFisco,
             false,
             "Informações Adicionais de Interesse do Fisco"
         );
+
         $this->dom->addChild(
             $infAdic,
             "infCpl",
-            $infCpl,
+            $std->infCpl,
             false,
             "Informações Complementares de interesse do Contribuinte"
         );
+
         $this->infAdic = $infAdic;
+
         return $infAdic;
     }
 
@@ -887,32 +1596,38 @@ class Make extends BaseMake
      *
      * Autorizados para download do XML do MDF-e
      *
-     * @param string $cnpj
-     * @param string $cpf
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+     * @param  stdClass $std
      * @return DOMElement
      */
-    public function tagautXML($cnpj = '', $cpf = '')
-    {
+    public function tagautXML(stdClass $std){
+        
+        $possible = [
+            'CNPJ',
+            'CPF'
+        ];
+
+        $std = $this->equilizeParameters($std, $possible);
+
         $autXML = $this->dom->createElement("autXML");
+
         $this->dom->addChild(
             $autXML,
             "CNPJ",
-            $cnpj,
+            $std->CNPJ,
             false,
             "CNPJ do autorizado"
         );
+
         $this->dom->addChild(
             $autXML,
             "CPF",
-            $cpf,
+            $std->CPF,
             false,
             "CPF do autorizado"
         );
+
         $this->aAutXML[] = $autXML;
+
         return $autXML;
     }
 
@@ -920,18 +1635,16 @@ class Make extends BaseMake
      * tagInfModal
      * tag MDFe/infMDFe/infModal
      *
-<<<<<<< HEAD
-     * @param  type $versaoModal
-=======
      * @param  string $versaoModal
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
-    public function tagInfModal($versaoModal = '')
+    public function tagInfModal($versaoModal = '3.00')
     {
         $infModal = $this->dom->createElement("infModal");
+
         $infModal->setAttribute("versaoModal", $versaoModal);
+
         $this->infModal = $infModal;
         return $infModal;
     }
@@ -946,10 +1659,7 @@ class Make extends BaseMake
      * @param  string $cAerEmb
      * @param  string $cAerDes
      * @param  string $dVoo
-<<<<<<< HEAD
-=======
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagAereo(
@@ -1016,10 +1726,7 @@ class Make extends BaseMake
      * @param  string $xOri
      * @param  string $xDest
      * @param  string $qVag
-<<<<<<< HEAD
-=======
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagTrem(
@@ -1076,12 +1783,8 @@ class Make extends BaseMake
      * @param  string $serie
      * @param  string $nVag
      * @param  string $nSeq
-<<<<<<< HEAD
-     * @param  string $tUtil
-=======
      * @param  string $tonUtil
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagVag(
@@ -1133,10 +1836,7 @@ class Make extends BaseMake
      * @param  string $nViagem
      * @param  string $cPrtEmb
      * @param  string $cPrtDest
-<<<<<<< HEAD
-=======
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagAqua(
@@ -1199,10 +1899,7 @@ class Make extends BaseMake
      * tag MDFe/infMDFe/infModal/Aqua/infTermCarreg
      *
      * @param  string $cTermCarreg
-<<<<<<< HEAD
-=======
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfTermCarreg(
@@ -1225,10 +1922,7 @@ class Make extends BaseMake
      * tag MDFe/infMDFe/infModal/Aqua/infTermDescarreg
      *
      * @param  string $cTermDescarreg
-<<<<<<< HEAD
-=======
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfTermDescarreg(
@@ -1250,12 +1944,8 @@ class Make extends BaseMake
      * tagInfEmbComb
      * tag MDFe/infMDFe/infModal/Aqua/infEmbComb
      *
-<<<<<<< HEAD
-     * @param  string $$cEmbComb
-=======
      * @param  string $cEmbComb
      *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * @return DOMElement
      */
     public function tagInfEmbComb(
@@ -1277,527 +1967,489 @@ class Make extends BaseMake
      * tagRodo
      * tag MDFe/infMDFe/infModal/rodo
      *
-     * @param  string $rntrc
-     * @param  string $ciot
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+     * @param  stdClass $stdrodo
      * @return DOMElement
      */
-    public function tagRodo(
-        $rntrc = '',
-        $ciot = ''
-    ) {
+    public function tagRodo($stdrodo) {
+        
         $rodo = $this->dom->createElement("rodo");
+
+        $infANTT = $this->dom->createElement("infANTT");
+
+        $isinfANTT = false;
+
+        if (isset($stdrodo->infCIOT) && $stdrodo->infCIOT){
+
+            $infCIOT = $this->dom->createElement("infCIOT");
+
+            $this->dom->addChild(
+                $infANTT,
+                "RNTRC",
+                $stdrodo->RNTRC,
+                false,
+                "Registro Nacional de Transportadores Rodoviár"
+            );
+
+            foreach ($stdrodo->infCIOT as $stdinfCIOT) {
+                
+                $this->dom->addChild(
+                    $infCIOT,
+                    "CIOT",
+                    $stdinfCIOT->CIOT,
+                    true,
+                    "Registro Nacional de Transportadores Rodoviár"
+                ); 
+                
+                $this->dom->addChild(
+                    $infCIOT,
+                    "CPF",
+                    $stdinfCIOT->CPF,
+                    false,
+                    "Número do CPF responsável pela geração do CIOT"
+                );                
+
+                $this->dom->addChild(
+                    $infCIOT,
+                    "CNPJ",
+                    $stdinfCIOT->CNPJ,
+                    false,
+                    "Número do CNPJ responsável pela geração do CIOT"
+                ); 
+
+                $this->dom->appChild($infANTT, $infCIOT, 'Falta tag "infANTT"');    
+
+            }
+
+            $isinfANTT = true;
+        }
+
+        if (isset($stdrodo->valePed) && $stdrodo->valePed){
+            
+            $valePed = $this->dom->createElement("valePed");
+
+            foreach ( $stdrodo->valePed as  $stdvalePed) {
+                
+                $disp = $this->dom->createElement("disp");
+
+                $this->dom->addChild(
+                    $disp,
+                    "CNPJForn",
+                    $stdvalePed->CNPJForn,
+                    true,
+                    "CNPJ da empresa N fornecedora do Vale-Pedágio"
+                );
+
+                $this->dom->addChild(
+                    $disp,
+                    "CNPJPg",
+                    $stdvalePed->CNPJPg,
+                    false,
+                    "CNPJ do responsável pelo N pagamento do Vale-Ped"
+                );
+
+                $this->dom->addChild(
+                    $disp,
+                    "CPFPg",
+                    $stdvalePed->CPFPg,
+                    false,
+                    "CPF do responsavel pelo N pagamento do CE Vale-Pedagio"
+                );
+
+                $this->dom->addChild(
+                    $disp,
+                    "nCompra",
+                    $stdvalePed->nCompra,
+                    true,
+                    "Número do comprovante de N compra"
+                );
+
+                $this->dom->addChild(
+                    $disp,
+                    "vValePed",
+                    $stdvalePed->vValePed,
+                    true,
+                    "Valor do Vale-Pedagio"
+                );
+
+                $this->dom->appChild($valePed, $disp, 'Falta tag "valePed"');    
+
+
+            }
+
+            $this->dom->appChild($infANTT, $valePed, 'Falta tag "valePed"');    
+
+            $isinfANTT = true;
+        }  
+
+        if (isset($stdrodo->infContratante) && $stdrodo->infContratante){
+
+            foreach ($stdrodo->infContratante as $stdinfContratante) {
+
+                $infContratante = $this->dom->createElement("infContratante");
+
+                $this->dom->addChild(
+                    $infContratante,
+                    "CPF",
+                    $stdinfContratante->CPF,
+                    false,
+                    "Número do CPF do contratante do serviço"
+                );
+
+                $this->dom->addChild(
+                    $infContratante,
+                    "CNPJ",
+                    $stdinfContratante->CNPJ,
+                    false,
+                    "Número do CNPJ do contratante do serviço"
+                );
+
+                $this->dom->appChild($infANTT, $infContratante, 'Falta tag "valePed"');    
+
+            }
+
+            $isinfANTT = true;
+
+        }
+             
+
+        if ($isinfANTT){
+            
+            $this->dom->appChild($rodo, $infANTT, 'Falta tag "infANTT"');    
+
+        }
+
+        if (isset($stdrodo->veicTracao) && $stdrodo->veicTracao){
+
+            $veicTracao = $this->dom->createElement("veicTracao");
+
+            $this->dom->addChild(
+                $veicTracao,
+                "cInt",
+                $stdrodo->veicTracao->cInt,
+                false,
+                "Código interno do veículo"
+            );
+
+            $this->dom->addChild(
+                $veicTracao,
+                "placa",
+                $stdrodo->veicTracao->placa,
+                true,
+                "Placa do veículo"
+            );
+
+            $this->dom->addChild(
+                $veicTracao,
+                "RENAVAM",
+                $stdrodo->veicTracao->RENAVAM,
+                false,
+                "RENAVAM do veículo"
+            );
+
+            $this->dom->addChild(
+                $veicTracao,
+                "tara",
+                $stdrodo->veicTracao->tara,
+                true,
+                "Tara em KG"
+            );
+
+            $this->dom->addChild(
+                $veicTracao,
+                "capKG",
+                $stdrodo->veicTracao->capKG,
+                false,
+                "Capacidade em KG"
+            );
+
+            $this->dom->addChild(
+                $veicTracao,
+                "capM3",
+                $stdrodo->veicTracao->capM3,
+                false,
+                "Capacidade em M3"
+            );
+
+            if (isset($stdrodo->veicTracao->prop) && $stdrodo->veicTracao->prop){
+
+                foreach ($stdrodo->veicTracao->prop as $stdprop) {
+
+                    $prop = $this->dom->createElement("prop");
+
+                    $this->dom->addChild(
+                        $prop,
+                        "CPF",
+                        $stdprop->CPF,
+                        false,
+                        "Número do CPF"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "CNPJ",
+                        $stdprop->CNPJ,
+                        false,
+                        "Número do CNPJ"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "RNTRC",
+                        $stdprop->RNTRC,
+                        true,
+                        "Registro Nacional dos Transportadores Rodoviário"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "xNome",
+                        $stdprop->xNome,
+                        true,
+                        "Razão Social ou Nome do proprietário"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "IE",
+                        $stdprop->IE,
+                        false,
+                        "Inscrição Estadual"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "UF",
+                        $stdprop->UF,
+                        false,
+                        "UF"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "tpProp",
+                        $stdprop->tpProp,
+                        true,
+                        "Tipo Proprietário"
+                    );
+
+                    $this->dom->appChild($veicTracao, $prop, 'Falta tag "veicTracao"');    
+
+                }
+
+            }
+
+            if (isset($stdrodo->veicTracao->condutor) && $stdrodo->veicTracao->condutor){
+
+                    foreach ($stdrodo->veicTracao->condutor as $stdcondutor) {
+
+                        $condutor = $this->dom->createElement("condutor");
+
+                        $this->dom->addChild(
+                            $condutor,
+                            "xNome",
+                            $stdcondutor->xNome,
+                            true,
+                            "Nome do Condutor"
+                        );
+
+                        $this->dom->addChild(
+                            $condutor,
+                            "CPF",
+                            $stdcondutor->CPF,
+                            true,
+                            "CPF do Condutor"
+                        );
+
+                        $this->dom->appChild($veicTracao, $condutor, 'Falta tag "veicTracao"');    
+
+                    }
+
+            }
+
+            $this->dom->addChild(
+                $veicTracao,
+                "tpRod",
+                $stdrodo->veicTracao->tpRod,
+                false,
+                "Tipo de Rodado"
+            );
+
+            $this->dom->addChild(
+                $veicTracao,
+                "tpCar",
+                $stdrodo->veicTracao->tpCar,
+                false,
+                "Tipo de Carroceria"
+            );
+
+            $this->dom->addChild(
+                $veicTracao,
+                "UF",
+                $stdrodo->veicTracao->UF,
+                false,
+                "UF em que veículo está licenciado"
+            );
+
+            $this->dom->appChild($rodo, $veicTracao, 'Falta tag "rodo"');    
+
+        }
+
+        if (isset($stdrodo->veicReboque) && $stdrodo->veicReboque){
+
+            $veicReboque = $this->dom->createElement("veicReboque");
+            
+            $this->dom->addChild(
+                $veicReboque,
+                "cInt",
+                $stdrodo->veicReboque->cInt,
+                false,
+                "Código interno do veículo"
+            );
+
+            $this->dom->addChild(
+                $veicReboque,
+                "placa",
+                $stdrodo->veicReboque->placa,
+                true,
+                "Placa do veículo"
+            );
+
+            $this->dom->addChild(
+                $veicReboque,
+                "RENAVAM",
+                $stdrodo->veicReboque->RENAVAM,
+                false,
+                "RENAVAM do veículo"
+            );
+
+            $this->dom->addChild(
+                $veicReboque,
+                "tara",
+                $stdrodo->veicReboque->tara,
+                true,
+                "Tara em KG"
+            );
+
+            $this->dom->addChild(
+                $veicReboque,
+                "capKG",
+                $veicReboque->capKG,
+                false,
+                "Capacidade em KG"
+            );
+
+            $this->dom->addChild(
+                $veicReboque,
+                "capM3",
+                $stdrodo->veicReboque->capM3,
+                false,
+                "Capacidade em M3"
+            );  
+            
+            if (isset($stdrodo->veicReboque->prop) && $stdrodo->veicReboque->prop){
+
+                foreach ($stdrodo->veicReboque->prop as $stdprop) {
+                    
+                    $prop = $this->dom->createElement("prop");
+
+                    $this->dom->addChild(
+                        $prop,
+                        "CPF",
+                        $stdprop->CPF,
+                        false,
+                        "Número do CPF"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "CNPJ",
+                        $stdprop->CNPJ,
+                        false,
+                        "Número do CNPJ"
+                    );    
+
+                    $this->dom->addChild(
+                        $prop,
+                        "RNTRC",
+                        $stdprop->RNTRC,
+                        true,
+                        "Registro Nacional dos Transportadores Rodoviário"
+                    ); 
+
+                    $this->dom->addChild(
+                        $prop,
+                        "xNome",
+                        $stdprop->xNome,
+                        true,
+                        "Razão Social ou Nome do proprietário"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "IE",
+                        $stdprop->IE,
+                        false,
+                        "Inscrição Estadual"
+                    );
+
+                    $this->dom->addChild(
+                        $prop,
+                        "UF",
+                        $stdprop->UF,
+                        false,
+                        "UF"
+                    );   
+
+                    $this->dom->addChild(
+                        $prop,
+                        "tpProp",
+                        $stdprop->tpProp,
+                        false,
+                        "Tipo Proprietário"
+                    );  
+
+                    $this->dom->appChild($veicReboque, $prop, 'Falta tag "veicReboque"');    
+
+                }
+
+            }                                 
+
+        }        
+
         $this->dom->addChild(
             $rodo,
-            "RNTRC",
-            $rntrc,
+            "codAgPorto",
+            $stdrodo->codAgPorto,
             false,
-            "Registro Nacional de Transportadores Rodoviários de Carga"
+            "Código de Agendamento no porto"
         );
-        $this->dom->addChild(
-            $rodo,
-            "CIOT",
-            $ciot,
-            false,
-            "Código Identificador da Operação de Transporte"
-        );
+
+        if ( isset($stdrodo->lacRodo) && $stdrodo->lacRodo){
+
+            foreach ($stdrodo->lacRodo as $stdlacRodo) {
+                
+                $lacRodo = $this->dom->createElement("lacRodo");
+
+                $this->dom->addChild(
+                    $lacRodo,
+                    "nLacre",
+                    $stdlacRodo->nLacre,
+                    true,
+                    "Lacre"
+                );
+
+                $this->dom->appChild($rodo, $lacRodo, 'Falta tag "rodo"');                    
+
+            }
+
+        }
+
         $this->rodo = $rodo;
+
         return $rodo;
     }
 
     /**
-     * tagVeicTracao
-     * tag MDFe/infMDFe/infModal/rodo/veicTracao
-     *
-     * @param  string $cInt
-     * @param  string $placa
-     * @param  string $tara
-     * @param  string $capKG
-     * @param  string $capM3
-<<<<<<< HEAD
-     * @param  string $propRNTRC
-=======
-     * @param  string $tpRod
-     * @param  string $tpCar
-     * @param  string $UF
-     * @param  string $propRNTRC
-     * @param  string $propCPF
-     * @param  string $propCNPJ
-     * @param  string $propXNome
-     * @param  string $propIE
-     * @param  string $propUF
-     * @param  string $propTpProp
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-     * @return DOMElement
-     */
-    public function tagVeicTracao(
-        $cInt = '',
-        $placa = '',
-        $tara = '',
-        $capKG = '',
-        $capM3 = '',
-        $tpRod = '',
-        $tpCar = '',
-        $UF = '',
-<<<<<<< HEAD
-        $propRNTRC = ''
-=======
-        $propRNTRC = '',
-        $propCPF = '',
-        $propCNPJ = '',
-        $propXNome = '',
-        $propIE = '',
-        $propUF = '',
-        $propTpProp = ''
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-    ) {
-        $veicTracao = $this->zTagVeiculo(
-            'veicTracao',
-            $cInt,
-            $placa,
-            $tara,
-            $this->aCondutor,
-            $capKG,
-            $capM3,
-            $tpRod,
-            $tpCar,
-            $UF,
-<<<<<<< HEAD
-            $propRNTRC
-=======
-            $propRNTRC,
-            $propCPF,
-            $propCNPJ,
-            $propXNome,
-            $propIE,
-            $propUF,
-            $propTpProp
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-        );
-        $this->veicTracao = $veicTracao;
-        return $veicTracao;
-    }
-
-    /**
-     * tagCondutor
-     * tag MDFe/infMDFe/infModal/rodo/veicTracao/condutor
-     *
-     * @param  string $xNome
-     * @param  string $cpf
-<<<<<<< HEAD
-=======
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-     * @return DOMElement
-     */
-    public function tagCondutor(
-        $xNome = '',
-        $cpf = ''
-    ) {
-        $condutor = $this->dom->createElement("condutor");
-        $this->dom->addChild(
-            $condutor,
-            "xNome",
-            $xNome,
-            true,
-            "Nome do condutor"
-        );
-        $this->dom->addChild(
-            $condutor,
-            "CPF",
-            $cpf,
-            true,
-            "CPF do condutor"
-        );
-        $this->aCondutor[] = $condutor;
-        return $condutor;
-    }
-
-    /**
-     * tagVeicReboque
-     * tag MDFe/infMDFe/infModal/rodo/reboque
-     *
-<<<<<<< HEAD
-     * @param  type $cInt
-     * @param  type $placa
-     * @param  type $tara
-     * @param  type $capKG
-     * @param  type $capM3
-     * @param  type $propRNTRC
-=======
-     * @param string $cInt
-     * @param string $placa
-     * @param string $tara
-     * @param string $capKG
-     * @param string $capM3
-     * @param string $propRNTRC
-     * @param string $propCPF
-     * @param string $propCNPJ
-     * @param string $propXNome
-     * @param string $propIE
-     * @param string $propUF
-     * @param string $propTpProp
-     * @param string $tpCar
-     * @param string $UF
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-     * @return DOMElement
-     */
-    public function tagVeicReboque(
-        $cInt = '',
-        $placa = '',
-        $tara = '',
-        $capKG = '',
-        $capM3 = '',
-<<<<<<< HEAD
-        $propRNTRC = ''
-    ) {
-        $reboque = $this->zTagVeiculo('reboque', $cInt, $placa, $tara, $capKG, $capM3, $propRNTRC);
-        $this->aReboque[] = $reboque;
-=======
-        $propRNTRC = '',
-        $propCPF = '',
-        $propCNPJ = '',
-        $propXNome = '',
-        $propIE = '',
-        $propUF = '',
-        $propTpProp = '',
-        $tpCar = '',
-        $UF = ''
-    ) {
-        $reboque = $this->zTagVeiculo(
-            'veicReboque',
-            $cInt,
-            $placa,
-            $tara,
-            [],
-            $capKG,
-            $capM3,
-            null,
-            $tpCar,
-            $UF,
-            $propRNTRC,
-            $propCPF,
-            $propCNPJ,
-            $propXNome,
-            $propIE,
-            $propUF,
-            $propTpProp
-        );
-
-        $this->aReboque[] = $reboque;
-
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-        return $reboque;
-    }
-
-    /**
-     * tagValePed
-     * tag MDFe/infMDFe/infModal/rodo/valePed
-     *
-<<<<<<< HEAD
-     * @param  type $cnpjForn
-     * @param  type $cnpjPg
-     * @param  type $nCompra
-=======
-     * @param  string $cnpjForn
-     * @param  string $cnpjPg
-     * @param  string $nCompra
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-     * @return DOMElement
-     */
-    public function tagValePed(
-        $cnpjForn = '',
-        $cnpjPg = '',
-        $nCompra = ''
-    ) {
-        $disp = $this->dom->createElement($disp);
-        $this->dom->addChild(
-            $disp,
-            "CNPJForn",
-            $cnpjForn,
-            true,
-            "CNPJ da empresa fornecedora do Vale-Pedágio"
-        );
-        $this->dom->addChild(
-            $disp,
-            "CNPJPg",
-            $cnpjPg,
-            false,
-            "CNPJ do responsável pelo pagamento do Vale-Pedágio"
-        );
-        $this->dom->addChild(
-            $disp,
-            "nCompra",
-            $nCompra,
-            true,
-            "Número do comprovante de compra"
-        );
-        $this->aDisp[] = $disp;
-        return $disp;
-    }
-
-    /**
-     * zTagVeiculo
-     *
-<<<<<<< HEAD
-     * @param  string $cInt
-     * @param  string $placa
-     * @param  string $tara
-     * @param  string $capKG
-     * @param  string $capM3
-     * @param  string $propRNTRC
-=======
-     * @param string $tag
-     * @param string $cInt
-     * @param string $placa
-     * @param string $tara
-     * @param array  $condutores
-     * @param string $capKG
-     * @param string $capM3
-     * @param string $tpRod
-     * @param string $tpCar
-     * @param string $UF
-     * @param string $propRNTRC
-     * @param string $propCPF
-     * @param string $propCNPJ
-     * @param string $propXNome
-     * @param string $propIE
-     * @param string $propUF
-     * @param string $propTpProp
-     *
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-     * @return DOMElement
-     */
-    protected function zTagVeiculo(
-        $tag = '',
-        $cInt = '',
-        $placa = '',
-        $tara = '',
-        $condutores = array(),
-        $capKG = '',
-        $capM3 = '',
-        $tpRod = '',
-        $tpCar = '',
-        $UF = '',
-<<<<<<< HEAD
-        $propRNTRC = ''
-=======
-        $propRNTRC = '',
-        $propCPF = '',
-        $propCNPJ = '',
-        $propXNome = '',
-        $propIE = '',
-        $propUF = '',
-        $propTpProp = ''
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-    ) {
-        $node = $this->dom->createElement($tag);
-        $this->dom->addChild(
-            $node,
-            "cInt",
-            $cInt,
-            false,
-            "Código interno do veículo"
-        );
-        $this->dom->addChild(
-            $node,
-            "placa",
-            $placa,
-            true,
-            "Placa do veículo"
-        );
-        $this->dom->addChild(
-            $node,
-            "tara",
-            $tara,
-            true,
-            "Tara em KG"
-        );
-        $this->dom->addArrayChild(
-            $node,
-            $condutores
-        );
-        $this->dom->addChild(
-            $node,
-            "capKG",
-            $capKG,
-            false,
-            "Capacidade em KG"
-        );
-        $this->dom->addChild(
-            $node,
-            "capM3",
-            $capM3,
-            false,
-            "Capacidade em M3"
-        );
-<<<<<<< HEAD
-        $this->dom->addArrayChild(
-            $node,
-            $this->aCondutor
-        );
-=======
-
-        $prop = $this->zTagPropVeiculo(
-            'prop',
-            $propCPF,
-            $propCNPJ,
-            $propRNTRC,
-            $propXNome,
-            $propIE,
-            $propUF,
-            $propTpProp
-        );
-
-        if ($prop) {
-            $node->appendChild($prop);
-        }
-
-        if ($condutores) {
-            $this->dom->addArrayChild(
-                $node,
-                $condutores
-            );
-        }
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-        $this->dom->addChild(
-            $node,
-            "tpRod",
-            $tpRod,
-<<<<<<< HEAD
-            true,
-=======
-            false,
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-            "Tipo de rodado"
-        );
-        $this->dom->addChild(
-            $node,
-            "tpCar",
-            $tpCar,
-            true,
-            "Tipo de carroceria"
-        );
-        $this->dom->addChild(
-            $node,
-            "UF",
-            $UF,
-            true,
-            "UF de licenciamento do veículo"
-        );
-<<<<<<< HEAD
-        if ($propRNTRC != '') {
-            $prop = $this->dom->createElement("prop");
-            $this->dom->addChild(
-                $prop,
-                "RNTRC",
-                $propRNTRC,
-                true,
-                "Registro Nacional dos Transportadores Rodoviários de Carga"
-            );
-            $this->dom->appChild($node, $prop, '');
-        }
-=======
-
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
-        return $node;
-    }
-
-    /**
-<<<<<<< HEAD
-=======
-     * @param string $tag
-     * @param string $CPF
-     * @param string $CNPJ
-     * @param string $RNTRC
-     * @param string $xNome
-     * @param string $IE
-     * @param string $UF
-     * @param string $tpProp
-     *
-     * @return DOMElement
-     */
-    protected function zTagPropVeiculo(
-        $tag = '',
-        $CPF = '',
-        $CNPJ = '',
-        $RNTRC = '',
-        $xNome = '',
-        $IE = '',
-        $UF = '',
-        $tpProp = ''
-    ) {
-        $args = func_get_args();
-        unset($args[0]);
-
-        if (!array_filter($args)) {
-            return false;
-        }
-
-        $identificador = "<{$tag}> - ";
-        $nodeProp = $this->dom->createElement($tag);
-
-        $this->dom->addChild(
-            $nodeProp,
-            'CPF',
-            $CPF,
-            false,
-            "{$identificador} Número do CPF do proprietário"
-        );
-        $this->dom->addChild(
-            $nodeProp,
-            'CNPJ',
-            $CNPJ,
-            false,
-            "{$identificador} Número do CNPJ do proprietário"
-        );
-        $this->dom->addChild(
-            $nodeProp,
-            'RNTRC',
-            $RNTRC,
-            true,
-            "{$identificador} Registro Nacional dos Transportadores Rodoviários de Carga do proprietário"
-        );
-        $this->dom->addChild(
-            $nodeProp,
-            'xNome',
-            $xNome,
-            true,
-            "{$identificador} Razão Social ou Nome do proprietário do proprietário"
-        );
-        $this->dom->addChild(
-            $nodeProp,
-            'IE',
-            $IE,
-            true,
-            "{$identificador} Inscrição Estadual do proprietário"
-        );
-        $this->dom->addChild(
-            $nodeProp,
-            'UF',
-            $UF,
-            true,
-            "{$identificador} UF do proprietário"
-        );
-        $this->dom->addChild(
-            $nodeProp,
-            'tpProp',
-            $tpProp,
-            true,
-            "{$identificador} Tipo do Proprietário"
-        );
-
-        return $nodeProp;
-    }
-
-    /**
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
      * zTagMDFe
      * Tag raiz da MDFe
      * tag MDFe DOMNode
@@ -1805,12 +2457,16 @@ class Make extends BaseMake
      *
      * @return DOMElement
      */
-    protected function zTagMDFe()
-    {
+    protected function zTagMDFe(){
+        
         if (empty($this->MDFe)) {
+
             $this->MDFe = $this->dom->createElement("MDFe");
+
             $this->MDFe->setAttribute("xmlns", "http://www.portalfiscal.inf.br/mdfe");
+
         }
+
         return $this->MDFe;
     }
 
@@ -1819,77 +2475,69 @@ class Make extends BaseMake
      * infMunCarrega e infPercurso
      * a tag ide
      */
-    protected function zTagIde()
-    {
+    protected function zTagIde(){
         $this->dom->addArrayChild($this->ide, $this->aInfMunCarrega);
+
         $this->dom->addArrayChild($this->ide, $this->aInfPercurso);
     }
 
     /**
      * Processa lacres
      */
-    protected function zTagLacres()
-    {
+    protected function zTagLacres(){
+
         $this->dom->addArrayChild($this->infMDFe, $this->aLacres);
+
     }
 
     /**
      * Proecessa documentos fiscais
      */
-    protected function zTagInfDoc()
-    {
-<<<<<<< HEAD
-        $this->aCountDoc = array('CTe'=>0, 'NFe'=>0, 'MDFe'=>0);
-=======
+    protected function zTagInfDoc(){
+
         $this->aCountDoc = ['CTe'=>0, 'NFe'=>0, 'MDFe'=>0];
->>>>>>> 9bb90728b8e11a0b317c268b668f55dd67e894d5
+
         if (! empty($this->aInfMunDescarga)) {
+
             $infDoc = $this->dom->createElement("infDoc");
+
             $this->aCountDoc['CTe'] = 0;
+
             $this->aCountDoc['NFe'] = 0;
+
             $this->aCountDoc['MDFe'] = 0;
+
             foreach ($this->aInfMunDescarga as $nItem => $node) {
+                
                 if (isset($this->aInfCTe[$nItem])) {
-                    $this->aCountDoc['CTe'] += $this->dom->addArrayChild($node, $this->aInfCTe[$nItem]);
+                    $this->dom->addArrayChild($node, $this->aInfCTe[$nItem]);
                 }
                 if (isset($this->aInfNFe[$nItem])) {
-                    $this->aCountDoc['NFe'] += $this->dom->addArrayChild($node, $this->aInfNFe[$nItem]);
+                   $this->dom->addArrayChild($node, $this->aInfNFe[$nItem]);
                 }
                 if (isset($this->aInfMDFe[$nItem])) {
-                    $this->aCountDoc['MDFe'] += $this->dom->addArrayChild($node, $this->aInfMDFe[$nItem]);
+                    $this->dom->addArrayChild($node, $this->aInfMDFe[$nItem]);
                 }
+
                 $this->dom->appChild($infDoc, $node, '');
             }
+
+
             $this->dom->appChild($this->infMDFe, $infDoc, 'Falta tag "infMDFe"');
+
         }
-        //ajusta quantidades em tot
-        if ($this->aCountDoc['CTe'] > 0) {
-            $this->tot->getElementsByTagName('qCTe')->item(0)->nodeValue = $this->aCountDoc['CTe'];
-        }
-        if ($this->aCountDoc['NFe'] > 0) {
-            $this->tot->getElementsByTagName('qNFe')->item(0)->nodeValue = $this->aCountDoc['NFe'];
-        }
-        if ($this->aCountDoc['MDFe'] > 0) {
-            $this->tot->getElementsByTagName('qMDFe')->item(0)->nodeValue = $this->aCountDoc['MDFe'];
-        }
+
     }
 
     /**
      * Processa modal rodoviario
      */
-    protected function zTagRodo()
-    {
-        if (! empty($this->rodo)) {
-            $this->dom->appChild($this->rodo, $this->veicTracao, 'Falta tag "rodo"');
-            $this->dom->addArrayChild($this->rodo, $this->aReboque);
-            if (! empty($this->aDisp)) {
-                $valePed = $this->dom->createElement("valePed");
-                foreach ($this->aDisp as $node) {
-                    $this->dom->appChild($valePed, $node, '');
-                }
-                $this->dom->appChild($this->rodo, $valePed, '');
-            }
+    protected function zTagRodo(){
+
+        if (!empty($this->rodo)) {
+
             $this->dom->appChild($this->infModal, $this->rodo, 'Falta tag "infModal"');
+
         }
     }
 
@@ -1952,10 +2600,13 @@ class Make extends BaseMake
         $cNF = $ide->getElementsByTagName('cMDF')->item(0)->nodeValue;
         $chave = str_replace('MDFe', '', $infMDFe->getAttribute("Id"));
         $tempData = explode("-", $dhEmi);
-        $chaveMontada = $this->montaChave(
+        
+        $dt = new DateTime($dhEmi);
+
+        $chaveMontada = Keys::build(
             $cUF,
-            $tempData[0] - 2000,
-            $tempData[1],
+            $dt->format('y'),
+            $dt->format('m'),
             $cnpj,
             $mod,
             $serie,
@@ -1963,13 +2614,36 @@ class Make extends BaseMake
             $tpEmis,
             $cNF
         );
+
         //caso a chave contida na NFe esteja errada
         //substituir a chave
+
         if ($chaveMontada != $chave) {
-            $ide->getElementsByTagName('cDV')->item(0)->nodeValue = substr($chaveMontada, -1);
-            $infMDFe = $dom->getElementsByTagName("infMDFe")->item(0);
-            $infMDFe->setAttribute("Id", "MDFe" . $chaveMontada);
-            $this->chMDFe = $chaveMontada;
+
+            throw new \Exception("Erro chave não condiz com os parametros");
+            
+            // $ide->getElementsByTagName('cDV')->item(0)->nodeValue = substr($chaveMontada, -1);
+            // $infMDFe = $dom->getElementsByTagName("infMDFe")->item(0);
+            // $infMDFe->setAttribute("Id", "MDFe" . $chaveMontada);
+            // $this->chMDFe = $chaveMontada;
         }
+    }
+
+    /**
+     * Includes missing or unsupported properties in stdClass
+     * @param stdClass $std
+     * @param array $possible
+     * @return stdClass
+    */
+    protected function equilizeParameters(stdClass $std, $possible){
+        $arr = get_object_vars($std);
+        
+        foreach ($possible as $key) {
+            if (!array_key_exists($key, $arr)) {
+                $std->$key = null;
+            }
+        }
+
+        return $std;
     }
 }

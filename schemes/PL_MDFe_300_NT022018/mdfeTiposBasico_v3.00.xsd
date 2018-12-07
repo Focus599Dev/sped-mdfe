@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2008 (http://www.altova.com) by sas-sofwares@procergs.rs.gov.br (PROCERGS) -->
+<!-- edited with XMLSpy v2008 (http://www.altova.com) by sas-softwares@procergs.rs.gov.br (PROCERGS) -->
 <xs:schema xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.portalfiscal.inf.br/mdfe" targetNamespace="http://www.portalfiscal.inf.br/mdfe" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema_v1.01.xsd"/>
 	<xs:include schemaLocation="tiposGeralMDFe_v3.00.xsd"/>
@@ -39,8 +39,9 @@ Tabela do IBGE de código de unidades da federação.</xs:documentation>
 											<xs:documentation>Tipo do Emitente
 </xs:documentation>
 											<xs:documentation>1 - Prestador de serviço de transporte 
-2 - Transportador de Carga Própria
-OBS: Deve ser preenchido com 2 para emitentes de NF-e e pelas transportadoras quando estiverem fazendo transporte de carga própria</xs:documentation>
+2 - Transportador de Carga Própria 3 - Prestador de serviço de transporte que emitirá CT-e Globalizado 
+
+OBS: Deve ser preenchido com 2 para emitentes de NF-e e pelas transportadoras quando estiverem fazendo transporte de carga própria. Deve ser preenchido com 3 para transportador de carga que emitirá à posteriori CT-e Globalizado relacionando as NF-e.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element name="tpTransp" type="TTransp" minOccurs="0">
@@ -59,11 +60,15 @@ OBS: Deve ser preenchido com 2 para emitentes de NF-e e pelas transportadoras qu
 											<xs:documentation>Utilizar o código 58 para identificação do MDF-e</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element name="serie" type="TSerie">
+									<xs:element name="serie">
 										<xs:annotation>
 											<xs:documentation>Série do Manifesto</xs:documentation>
-											<xs:documentation>Informar a série do documento fiscal (informar zero se inexistente).</xs:documentation>
+											<xs:documentation>Informar a série do documento fiscal (informar zero se inexistente).
+Série na faixa [920-969]: Reservada para emissão por contribuinte pessoa física com inscrição estadual.</xs:documentation>
 										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="TSerie"/>
+										</xs:simpleType>
 									</xs:element>
 									<xs:element name="nMDF" type="TNF">
 										<xs:annotation>
@@ -204,6 +209,16 @@ Informar 'EX' para operações com o exterior.</xs:documentation>
 											<xs:documentation>Formato AAAA-MM-DDTHH:MM:DD TZD</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element name="indCanalVerde" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>Indicador de participação do Canal Verde</xs:documentation>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:string">
+												<xs:enumeration value="1"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -213,12 +228,21 @@ Informar 'EX' para operações com o exterior.</xs:documentation>
 							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
-									<xs:element name="CNPJ" type="TCnpj">
-										<xs:annotation>
-											<xs:documentation>CNPJ do emitente</xs:documentation>
-											<xs:documentation>Informar zeros não significativos</xs:documentation>
-										</xs:annotation>
-									</xs:element>
+									<xs:choice>
+										<xs:element name="CNPJ" type="TCnpj">
+											<xs:annotation>
+												<xs:documentation>CNPJ do emitente</xs:documentation>
+												<xs:documentation>Informar zeros não significativos</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="CPF" type="TCpf">
+											<xs:annotation>
+												<xs:documentation>CPF do emitente</xs:documentation>
+												<xs:documentation>Informar zeros não significativos
+Usar com serie específica 920-969 para emitente pessoa física com inscrição estadual</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:choice>
 									<xs:element name="IE">
 										<xs:annotation>
 											<xs:documentation>Inscrição Estadual do emitemte</xs:documentation>
@@ -263,7 +287,23 @@ Informar 'EX' para operações com o exterior.</xs:documentation>
 							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
-									<xs:include schemaLocation="tiposGeralMDFe_v3.00.xsd"/>
+									<xs:any processContents="skip">
+										<xs:annotation>
+											<xs:documentation>XML do modal
+Insira neste local o XML específico do modal (rodoviário, aéreo, ferroviário ou aquaviário).  </xs:documentation>
+											<xs:documentation>O elemento do tipo -any- permite estender o documento XML com elementos não especificados pelo schema.
+					Insira neste local - any- o XML específico do modal (rodoviário, aéreo, ferroviário ou aquaviário). A especificação do schema XML para cada modal pode ser encontrada nos arquivos que acompanham este pacote de liberação:
+	
+Rodoviário - ver arquivo MDFeModalRodoviario_v9.99
+			Aéreo - ver arquivo MDFeModalAereo_v9.99
+				Aquaviário - arquivo MDFeModalAquaviario_v9.99
+			Ferroviário - arquivo MDFeModalFerroviario_v9.99
+
+
+Onde v9.99 é a a designação genérica para a versão do arquivo. 
+Por exemplo, o arquivo para o schema do modal Rodoviário na versão 1.00 será denominado "MDFeModalRodoviario_v1.00".</xs:documentation>
+										</xs:annotation>
+									</xs:any>
 								</xs:sequence>
 								<xs:attribute name="versaoModal" use="required">
 									<xs:annotation>
@@ -306,7 +346,7 @@ Informar 'EX' para operações com o exterior.</xs:documentation>
 														</xs:restriction>
 													</xs:simpleType>
 												</xs:element>
-												<xs:element name="infCTe" minOccurs="0" maxOccurs="4000">
+												<xs:element name="infCTe" minOccurs="0" maxOccurs="10000">
 													<xs:annotation>
 														<xs:documentation>Conhecimentos de Tranporte - usar este grupo quando for prestador de serviço de transporte</xs:documentation>
 													</xs:annotation>
@@ -421,10 +461,29 @@ Informar 'EX' para operações com o exterior.</xs:documentation>
 																	</xs:sequence>
 																</xs:complexType>
 															</xs:element>
+															<xs:element name="infEntregaParcial" minOccurs="0">
+																<xs:annotation>
+																	<xs:documentation>Grupo de informações da Entrega Parcial (Corte de Voo)</xs:documentation>
+																</xs:annotation>
+																<xs:complexType>
+																	<xs:sequence>
+																		<xs:element name="qtdTotal" type="TDec_1104">
+																			<xs:annotation>
+																				<xs:documentation>Quantidade total de volumes</xs:documentation>
+																			</xs:annotation>
+																		</xs:element>
+																		<xs:element name="qtdParcial" type="TDec_1104">
+																			<xs:annotation>
+																				<xs:documentation>Quantidade de volumes enviados no MDF-e</xs:documentation>
+																			</xs:annotation>
+																		</xs:element>
+																	</xs:sequence>
+																</xs:complexType>
+															</xs:element>
 														</xs:sequence>
 													</xs:complexType>
 												</xs:element>
-												<xs:element name="infNFe" minOccurs="0" maxOccurs="4000">
+												<xs:element name="infNFe" minOccurs="0" maxOccurs="10000">
 													<xs:annotation>
 														<xs:documentation>Nota Fiscal Eletronica</xs:documentation>
 													</xs:annotation>
@@ -542,7 +601,7 @@ Informar 'EX' para operações com o exterior.</xs:documentation>
 														</xs:sequence>
 													</xs:complexType>
 												</xs:element>
-												<xs:element name="infMDFeTransp" minOccurs="0" maxOccurs="4000">
+												<xs:element name="infMDFeTransp" minOccurs="0" maxOccurs="10000">
 													<xs:annotation>
 														<xs:documentation>Manifesto Eletrônico de Documentos Fiscais. Somente para modal Aquaviário (vide regras MOC)</xs:documentation>
 													</xs:annotation>
@@ -695,7 +754,7 @@ Dados obrigatórios apenas no modal Rodoviário, depois da lei 11.442/07. Para o
 													</xs:simpleType>
 												</xs:element>
 												<xs:choice minOccurs="0">
-													<xs:element name="CNPJ" type="TCnpjOpc">
+													<xs:element name="CNPJ" type="TCnpj">
 														<xs:annotation>
 															<xs:documentation>Número do CNPJ do responsável pelo seguro</xs:documentation>
 															<xs:documentation>Obrigatório apenas se responsável pelo seguro for (2) responsável pela contratação do transporte - pessoa jurídica</xs:documentation>
@@ -902,6 +961,11 @@ Dados obrigatórios apenas no modal Rodoviário, depois da lei 11.442/07. Para o
 									</xs:element>
 								</xs:sequence>
 							</xs:complexType>
+						</xs:element>
+						<xs:element name="infRespTec" type="TRespTec" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Informações do Responsável Técnico pela emissão do DF-e</xs:documentation>
+							</xs:annotation>
 						</xs:element>
 					</xs:sequence>
 					<xs:attribute name="versao" type="TVerMDe" use="required">
@@ -1879,6 +1943,73 @@ Por exemplo: para rodoviário tração ou reboque deverá preencher com a placa 
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
+	<xs:complexType name="TRespTec">
+		<xs:annotation>
+			<xs:documentation>Tipo Dados da Responsável Técnico</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="CNPJ" type="TCnpj">
+				<xs:annotation>
+					<xs:documentation>CNPJ da pessoa jurídica responsável técnica pelo sistema utilizado na emissão do documento fiscal eletrônico</xs:documentation>
+					<xs:documentation>Informar o CNPJ da pessoa jurídica desenvolvedora do sistema utilizado na emissão do documento fiscal eletrônico.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="xContato">
+				<xs:annotation>
+					<xs:documentation>Nome da pessoa a ser contatada</xs:documentation>
+					<xs:documentation>Informar o nome da pessoa a ser contatada na empresa desenvolvedora do sistema utilizado na emissão do documento fiscal eletrônico. No caso de pessoa física, informar o respectivo nome.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="TString">
+						<xs:maxLength value="60"/>
+						<xs:minLength value="2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="email" type="TEmail">
+				<xs:annotation>
+					<xs:documentation>Email da pessoa jurídica a ser contatada</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="fone">
+				<xs:annotation>
+					<xs:documentation>Telefone da pessoa jurídica a ser contatada</xs:documentation>
+					<xs:documentation>Preencher com o Código DDD + número do telefone.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:whiteSpace value="preserve"/>
+						<xs:pattern value="[0-9]{7,12}"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:sequence minOccurs="0">
+				<xs:element name="idCSRT">
+					<xs:annotation>
+						<xs:documentation>Identificador do código de segurança do responsável técnico</xs:documentation>
+						<xs:documentation>Identificador do CSRT utilizado para geração do hash</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:pattern value="[0-9]{3}"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="hashCSRT">
+					<xs:annotation>
+						<xs:documentation>Hash do token do código de segurança do responsável técnico</xs:documentation>
+						<xs:documentation>O hashCSRT é o resultado das funções SHA-1 e base64 do token CSRT fornecido pelo fisco + chave de acesso do DF-e. (Implementação em futura NT)</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:base64Binary">
+							<xs:minLength value="28"/>
+							<xs:maxLength value="28"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+			</xs:sequence>
+		</xs:sequence>
+	</xs:complexType>
 	<xs:simpleType name="TProcEmi">
 		<xs:annotation>
 			<xs:documentation>Tipo processo de emissão do MDF-e</xs:documentation>
@@ -1993,7 +2124,7 @@ Por exemplo: para rodoviário tração ou reboque deverá preencher com a placa 
 		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:whiteSpace value="preserve"/>
-			<xs:minLength value="1"/>
+			<xs:minLength value="6"/>
 			<xs:maxLength value="60"/>
 			<xs:pattern value="[^@]+@[^\.]+\..+"/>
 		</xs:restriction>

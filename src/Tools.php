@@ -15,9 +15,9 @@ namespace NFePHP\MDFe;
 
 use NFePHP\MDFe\Common\Tools AS BaseTools;
 use NFePHP\Common\DateTime\DateTime;
-use NFePHP\Common\Strings\Strings;
+use NFePHP\Common\Strings;
 use NFePHP\Common\Exception;
-use NFePHP\Common\Dom\Dom;
+use NFePHP\Common\DOMImproved as Dom;
 use NFePHP\Common\Dom\ValidXsd;
 use NFePHP\MDFe\Auxiliar\Response;
 use NFePHP\MDFe\Auxiliar\Identify;
@@ -37,7 +37,7 @@ class Tools extends BaseTools{
      */
     public function addProtocolo($pathMDFefile = '', $pathProtfile = '', $saveFile = false){
         //carrega a MDFe
-        $docmdfe = new Dom();
+        $docmdfe = new Dom('1.0', 'UTF-8');
         if (file_exists($pathMDFefile)) {
             //carrega o XML pelo caminho do arquivo informado
             $docmdfe->loadXMLFile($pathMDFefile);
@@ -127,18 +127,8 @@ class Tools extends BaseTools{
         //salva o xml como string em uma variável
         $procXML = $procmdfe->saveXML();
         //remove as informações indesejadas
-        $procXML = Strings::clearProt($procXML);
-        if ($saveFile) {
-            $filename = "$chaveMDFe-protMDFe.xml";
-            $this->zGravaFile(
-                'mdfe',
-                $tpAmb,
-                $filename,
-                $procXML,
-                'enviadas'.DIRECTORY_SEPARATOR.'aprovadas',
-                $anomes
-            );
-        }
+        $procXML = Strings::clearProtocoledXML($procXML);
+        
         return $procXML;
     }
 

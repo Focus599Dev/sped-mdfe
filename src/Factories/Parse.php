@@ -430,7 +430,7 @@ class Parser{
      * @param stdClass $std
      * @return void
     */
-    protected function f07Entity($std){
+    protected function f99Entity($std){
 
         $this->make->tagInfCTe($this->stdinfCTe, $this->stdinfUnidTransp, $this->stdPeri, $this->stdInfEntregaParcial);
     
@@ -528,7 +528,7 @@ class Parser{
      * @param stdClass $std
      * @return void
     */
-    protected function h06Entity($std){
+    protected function h99Entity($std){
 
         $this->make->tagInfNFe($this->stdinfNFe, $this->stdinfUnidTransp, $this->stdPeri, $this->stdInfEntregaParcial);
     
@@ -626,7 +626,7 @@ class Parser{
      * @param stdClass $std
      * @return void
     */
-    protected function j06Entity($std){
+    protected function j99Entity($std){
 
         $this->make->tagInfMDFeTransp($this->stdinfMDFeTransp, $this->stdinfUnidTransp, $this->stdPeri, $this->stdInfEntregaParcial);
 
@@ -814,7 +814,7 @@ class Parser{
      * @param stdClass $std
      * @return void
     */
-    protected function p04Entity($std){
+    protected function P99Entity($std){
 
         $this->make->tagRodo($this->stdrodo);
 

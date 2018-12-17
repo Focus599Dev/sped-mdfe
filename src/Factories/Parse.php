@@ -848,7 +848,7 @@ class Parser{
 
     /**
      * Create tags lacres [Y02]
-     * Y02|CNPJ|CPF|
+     * Y02|CPF|CNPJ|
      * @param stdClass $std
      * @return void
     */

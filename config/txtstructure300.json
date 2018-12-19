@@ -49,6 +49,6 @@
 	"P99":"P99|",
 	"W02":"W02|qCTe|qNFe|qMDFe|vCarga|cUnid|qCarga|",
 	"X02":"X02|nLacre|",
-	"Y02":"Y02|CNPJ|CPF|",
+	"Y02":"Y02|CPF|CNPJ|",
 	"Z":"Z|infAdFisco|infCpl|"
 }

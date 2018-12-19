@@ -331,7 +331,7 @@ class Make{
         $this->dom->addChild(
             $ide,
             "serie",
-            $std->serie,
+            intval($std->serie),
             true,
             $identificador . "Série do Documento Fiscal"
         );

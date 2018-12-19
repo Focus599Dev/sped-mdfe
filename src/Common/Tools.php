@@ -259,7 +259,7 @@ class Tools {
                 . "da federação [$sigla], com o modelo [$this->modelo]."
             );
         }
-
+        
         if (empty($stdServ->$service->url)) {
             throw new \RuntimeException(
                 "Este serviço [$service] não está disponivel para esta "

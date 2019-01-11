@@ -318,7 +318,7 @@ class Parser{
      */
     protected function eEntity($std){
         
-        if ($this->itemInfMunDescarga == null) {
+        if ($this->itemInfMunDescarga === null) {
             
             $this->itemInfMunDescarga = 0;
         

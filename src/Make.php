@@ -2333,7 +2333,7 @@ class Make{
             $this->dom->addChild(
                 $veicReboque,
                 "capKG",
-                $veicReboque->capKG,
+                $stdrodo->veicReboque->capKG,
                 false,
                 "Capacidade em KG"
             );
@@ -2412,8 +2412,25 @@ class Make{
 
                 }
 
-            }                                 
+            }
 
+            $this->dom->addChild(
+                $veicReboque,
+                "tpCar",
+                $stdrodo->veicReboque->tpCar,
+                false,
+                "Tipo de Carroceria"
+            );   
+
+            $this->dom->addChild(
+                $veicReboque,
+                "UF",
+                $stdrodo->veicReboque->UF,
+                false,
+                "UF em que veículo está licenciado"
+            );                                   
+
+            $this->dom->appChild($rodo, $veicReboque, 'Falta tag "veicTracao"');    
         }        
 
         $this->dom->addChild(
@@ -2600,7 +2617,7 @@ class Make{
         $cNF = $ide->getElementsByTagName('cMDF')->item(0)->nodeValue;
         $chave = str_replace('MDFe', '', $infMDFe->getAttribute("Id"));
         $tempData = explode("-", $dhEmi);
-        
+       
         $dt = new DateTime($dhEmi);
 
         $chaveMontada = Keys::build(

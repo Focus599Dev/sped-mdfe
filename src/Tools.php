@@ -530,7 +530,7 @@ class Tools extends BaseTools{
      * @throws   Exception\RuntimeException
      * @internal function zLoadServico (Common\Base\BaseTools)
      */
-    public function sefazStatus($siglaUF = '', $tpAmb = '2')
+    public function sefazStatus($siglaUF = '', $tpAmb = '')
     {
         if ($tpAmb == '') {
             $tpAmb = $this->config->tpAmb;
@@ -756,7 +756,7 @@ class Tools extends BaseTools{
      * @return string
      * @throws Exception\RuntimeException
      */
-    public function sefazConsultaNaoEncerrados($tpAmb = '2', $cnpj = '', &$aRetorno = array())
+    public function sefazConsultaNaoEncerrados($tpAmb = '', $cnpj = '', &$aRetorno = array())
     {
         if ($tpAmb == '') {
             $tpAmb = $this->aConfig['tpAmb'];
@@ -824,7 +824,7 @@ class Tools extends BaseTools{
     protected function sefazEvento(
         $siglaUF = '',
         $chave = '',
-        $tpAmb = '2',
+        $tpAmb = '',
         $tpEvento = '',
         $nSeqEvento = '1',
         $tagAdic = ''

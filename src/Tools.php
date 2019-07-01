@@ -351,7 +351,7 @@ class Tools extends BaseTools{
      */
     public function sefazEnviaLote(
         $aXml,
-        $tpAmb = '2',
+        $tpAmb = '',
         $idLote = '',
         &$aRetorno = array()
     ) {
@@ -417,7 +417,7 @@ class Tools extends BaseTools{
      * @throws   Exception\RuntimeException
      * @internal function zLoadServico (Common\Base\BaseTools)
      */
-    public function sefazConsultaRecibo($recibo = '', $tpAmb = '2')
+    public function sefazConsultaRecibo($recibo = '', $tpAmb = '')
     {
         if ($recibo == '') {
             $msg = "Deve ser informado um recibo.";

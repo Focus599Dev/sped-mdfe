@@ -2738,7 +2738,7 @@ class Make{
 
         if ($std->qrCodMDFe == ''){
             
-            $url = 'http://dfe-portal.svrs.rs.gov.br/mdfe/QRCode?';
+            $url = 'https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?';
 
             $chave = preg_replace('/\D/', '', $this->chMDFe);
 

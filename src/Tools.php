@@ -417,15 +417,14 @@ class Tools extends BaseTools{
      * @throws   Exception\RuntimeException
      * @internal function zLoadServico (Common\Base\BaseTools)
      */
-    public function sefazConsultaRecibo($recibo = '', $tpAmb = '')
+    public function sefazConsultaRecibo($recibo = '')
     {
         if ($recibo == '') {
             $msg = "Deve ser informado um recibo.";
             throw new Exception\InvalidArgumentException($msg);
         }
-        if ($tpAmb == '') {
-            $tpAmb = $this->config->tpAmb;
-        }
+        
+        $tpAmb = $this->config->tpAmb;
 
         $siglaUF = $this->config->siglaUF;
         
@@ -471,7 +470,7 @@ class Tools extends BaseTools{
      * @throws   Exception\RuntimeException
      * @internal function zLoadServico (Common\Base\BaseTools)
      */
-    public function sefazConsultaChave($chave = '', $tpAmb = null){
+    public function sefazConsultaChave($chave = ''){
         $chMDFe = preg_replace('/[^0-9]/', '', $chave);
         
         if (strlen($chMDFe) != 44) {
@@ -479,9 +478,7 @@ class Tools extends BaseTools{
             throw new Exception\InvalidArgumentException($msg);
         }
 
-        if ($tpAmb == '') {
-            $tpAmb = $this->config->tpAmb;
-        }
+        $tpAmb = $this->config->tpAmb;
 
         $siglaUF = UFList::getUFByCode(substr($chave, 0, 2));
 
@@ -530,11 +527,11 @@ class Tools extends BaseTools{
      * @throws   Exception\RuntimeException
      * @internal function zLoadServico (Common\Base\BaseTools)
      */
-    public function sefazStatus($siglaUF = '', $tpAmb = '')
+    public function sefazStatus($siglaUF = '')
     {
-        if ($tpAmb == '') {
-            $tpAmb = $this->config->tpAmb;
-        }
+        
+        $tpAmb = $this->config->tpAmb;
+
         if ($siglaUF == '') {
             $siglaUF = $this->config->siglaUF;
         }
@@ -717,7 +714,7 @@ class Tools extends BaseTools{
 
         $chMDFe = preg_replace('/[^0-9]/', '', $chave);
 
-        if (strlen($chMDFe) != 44) {
+        if (strlen($chave) != 44) {
             $msg = "Uma chave de MDFe válida não foi passada como parâmetro $chMDFe.";
             throw new Exception\InvalidArgumentException($msg);
         }
@@ -738,7 +735,70 @@ class Tools extends BaseTools{
 
         $retorno = $this->sefazEvento(
                     $siglaUF,
-                    $chMDFe,
+                    $chave,
+                    $tpAmb,
+                    $tpEvento,
+                    $nSeqEvento,
+                    $tagAdic);
+
+        return $retorno;
+    }
+
+    /**
+     * sefazIncluiDFe
+     *
+     * @param  string $chave
+     * @param  string $tpAmb
+     * @param  string $nSeqEvento
+     * @param  string $xNome
+     * @param  string $cpf
+     * @param  array  $aRetorno
+     * @return string
+     * @throws Exception\InvalidArgumentException
+     */
+    public function sefazIncluiDFe(
+        $chave = '',
+        $nSeqEvento = '1',
+        $nProt = '',
+        $cMunCarrega = '',
+        $xMunCarrega = '',
+        $cMunDescarga = '',
+        $xMunDescarga = '',
+        $chNFe = ''
+    ) {
+        
+        $tpAmb = $this->config->tpAmb;
+
+        $chMDFe = preg_replace('/[^0-9]/', '', $chave);
+
+        if (strlen($chave) != 44) {
+            $msg = "Uma chave de MDFe válida não foi passada como parâmetro $chave.";
+            throw new Exception\InvalidArgumentException($msg);
+        }
+
+        if (strlen($chNFe) != 44) {
+            $msg = "Uma chave de NFe válida não foi passada como parâmetro $chMDFe.";
+            throw new Exception\InvalidArgumentException($msg);
+        }
+
+        $siglaUF = UFList::getUFByCode(substr($chave, 0, 2));
+
+        //estabelece o codigo do tipo de evento Inclusao DF-e
+        //
+        $tpEvento = '110115';
+        if ($nSeqEvento == '') {
+            $nSeqEvento = '1';
+        }
+
+        //monta mensagem
+        $tagAdic = "<evIncDFeMDFe><descEvento>Inclusao DF-e</descEvento>"
+                . "<nProt>$nProt</nProt><cMunCarrega>$cMunCarrega</cMunCarrega><xMunCarrega>$xMunCarrega</xMunCarrega><infDoc><cMunDescarga>$cMunDescarga</cMunDescarga><xMunDescarga>$xMunDescarga</xMunDescarga><chNFe>$chNFe</chNFe></infDoc></evIncDFeMDFe>";
+
+        $cOrgao = '';
+
+        $retorno = $this->sefazEvento(
+                    $siglaUF,
+                    $chave,
                     $tpAmb,
                     $tpEvento,
                     $nSeqEvento,
@@ -926,6 +986,11 @@ class Tools extends BaseTools{
                 //inclusao do condutor
                 $aliasEvento = 'EvIncCondut';
                 $descEvento = 'Inclusao Condutor';
+                break;
+            case '110115':
+                //Inclusao DF-e
+                $aliasEvento = 'EvIncDFeMDFe';
+                $descEvento = 'Inclusao DF-e”';
                 break;
             default:
                 $msg = "O código do tipo de evento informado não corresponde a "

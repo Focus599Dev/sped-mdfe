@@ -96,7 +96,7 @@ class Parser{
         $path = realpath(__DIR__ . "/../../config/txtstructure$ver.json");
         
         $this->structure = json_decode(file_get_contents($path), true);
-        
+
         $this->version = $version;
         
         $this->make = new Make();
@@ -128,6 +128,7 @@ class Parser{
      * @return void
      */
     protected function array2xml($nota){
+
 
         foreach ($nota as $lin) {
             
@@ -204,7 +205,6 @@ class Parser{
      */
     protected function bEntity($std){
         $this->stdide = $std;
-        
     }
 
      /**
@@ -871,14 +871,28 @@ class Parser{
     }
 
     /**
-     * Create tags infRespTec [IRT]
-     * IRT|
+     * Create tags infRespTec [ZD]
+     * ZD|CNPJ|xContato|email|fone|CSRT|idCSRT|
      * @param stdClass $std
      * @return void
     */
-    protected function irtEntity($std){
+    protected function zdEntity($std){
 
-        // make anything
+        $this->make->taginfRespTec($std);
+
+    }
+
+    
+
+    /**
+     * Create tags infMDFeSupl [ZE]
+     * ZE|qrCodMDFe|
+     * @param stdClass $std
+     * @return void
+    */
+    protected function zeEntity($std){
+
+        $this->make->taginfMDFeSupl($std);
 
     }
 

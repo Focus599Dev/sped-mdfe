@@ -50,5 +50,7 @@
 	"W02":"W02|qCTe|qNFe|qMDFe|vCarga|cUnid|qCarga|",
 	"X02":"X02|nLacre|",
 	"Y02":"Y02|CPF|CNPJ|",
-	"Z":"Z|infAdFisco|infCpl|"
+	"Z":"Z|infAdFisco|infCpl|",
+	"ZD":"ZD|CNPJ|xContato|email|fone|CSRT|idCSRT|",
+	"ZE":"ZE|qrCodMDFe|"
 }

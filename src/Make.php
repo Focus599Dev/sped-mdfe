@@ -114,6 +114,16 @@ class Make{
      */
     private $aqua = '';
 
+    /**
+     * @type string|\DOMNode
+    */
+    private $infRespTec = '';
+
+    /**
+     * @type string|\DOMNode
+    */
+    private $infMDFeSupl = '';
+
     // Arrays
     private $aInfMunCarrega = []; //array de DOMNode
     private $aInfPercurso = []; //array de DOMNode
@@ -202,8 +212,22 @@ class Make{
         }
         //tag infAdic [78]
         $this->dom->appChild($this->infMDFe, $this->infAdic, 'Falta tag "infMDFe"');
+
+        if ( $this->infRespTec){
+            
+            $this->dom->appChild($this->infMDFe, $this->infRespTec, 'Falta tag "infMDFe"');
+
+        }
+
         //[1] tag infMDFe (1 A01)
         $this->dom->appChild($this->MDFe, $this->infMDFe, 'Falta tag "MDFe"');
+
+        if ( $this->infMDFeSupl){
+
+            $this->dom->appChild($this->MDFe, $this->infMDFeSupl, 'Falta tag "infMDFe"');
+            
+        }
+        
         //[0] tag MDFe
         $this->dom->appendChild($this->MDFe);
         // testa da chave
@@ -2627,6 +2651,123 @@ class Make{
             // $infMDFe->setAttribute("Id", "MDFe" . $chaveMontada);
             // $this->chMDFe = $chaveMontada;
         }
+    }
+
+    /**
+     * Informações do Responsável técnico ZD
+     * @param stdClass $std
+     * @return DOMElement
+     * @throws RuntimeException
+     */
+    public function taginfRespTec(stdClass $std){
+
+        $infRespTec = $this->dom->createElement("infRespTec");
+
+        $this->dom->addChild(
+            $infRespTec,
+            "CNPJ",
+            $std->CNPJ,
+            true,
+            "Informar o CNPJ da pessoa jurídica responsável pelo sistema "
+            . "utilizado na emissão do documento fiscal eletrônico"
+        );
+
+        $this->dom->addChild(
+            $infRespTec,
+            "xContato",
+            $std->xContato,
+            true,
+            "Informar o nome da pessoa a ser contatada na empresa desenvolvedora "
+            . "do sistema utilizado na emissão do documento fiscal eletrônico"
+        );
+
+        $this->dom->addChild(
+            $infRespTec,
+            "email",
+            $std->email,
+            true,
+            "Informar o e-mail da pessoa a ser contatada na empresa "
+            . "desenvolvedora do sistema."
+        );
+
+        $this->dom->addChild(
+            $infRespTec,
+            "fone",
+            $std->fone,
+            true,
+            "Informar o telefone da pessoa a ser contatada na empresa "
+            . "desenvolvedora do sistema."
+        );
+        
+        if (!empty($std->CSRT) && !empty($std->idCSRT)) {
+
+            $this->csrt = $std->CSRT;
+
+            $this->dom->addChild(
+                $infRespTec,
+                "idCSRT",
+                $std->idCSRT,
+                true,
+                "Identificador do CSRT utilizado para montar o hash do CSRT"
+            );
+
+            $this->dom->addChild(
+                $infRespTec,
+                "hashCSRT",
+                $this->hashCSRT($std->CSRT),
+                true,
+                "hash do CSRT"
+            );
+        }
+
+        $this->infRespTec = $infRespTec;
+
+        return $infRespTec;
+    }
+
+
+     /**
+     * Informações suplementares do MDF-e ZE
+     * @param stdClass $std
+     * @return DOMElement
+     * @throws RuntimeException
+     */
+    public function taginfMDFeSupl(stdClass $std){
+        
+        $infMDFeSupl = $this->dom->createElement("infMDFeSupl");
+
+        if ($std->qrCodMDFe == ''){
+            
+            $url = 'http://dfe-portal.svrs.rs.gov.br/mdfe/QRCode?';
+
+            $chave = preg_replace('/\D/', '', $this->chMDFe);
+
+            $tpAmb = $this->tpAmb;
+
+            $std->qrCodMDFe = $url . 'chMDFe=' . $chave . '&tpAmb=' . $tpAmb;
+        }
+
+        $this->dom->addChild(
+            $infMDFeSupl,
+            "qrCodMDFe",
+            $std->qrCodMDFe,
+            false,
+            "Texto com o QR-Code para consulta do MDF-e"
+        );
+
+        $this->infMDFeSupl = $infMDFeSupl;
+    }
+
+    /**
+     * Calcula hash sha1 retornando Base64Binary
+     * @param string $CSRT
+     * @return string
+    */
+    protected function hashCSRT($CSRT){
+        
+        $comb = $CSRT . $this->chNFe;
+
+        return base64_encode(sha1($comb));
     }
 
     /**
